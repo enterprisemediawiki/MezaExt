@@ -2,5 +2,9 @@
 	"extension-meza-desc": "Extension to capture all the little things meza (https://github.com/enterprisemediawiki/meza) wants",
 	"serverstatus-mode-httpdstatus": "Apache server status",
 	"serverstatus-mode-httpdinfo": "Apache server info",
-	"serverstatus-mode-phpinfo": "PHP info"
+	"serverstatus-mode-phpinfo": "PHP info",
+	"action-viewserverstatus": "view Apache httpd and PHP info pages",
+	"serverstatus": "Server status",
+	"serverstatus-desc": "Server status",
+	"serverstatus-summary": ""
 }

@@ -4,15 +4,22 @@ class SpecialServerStatus extends SpecialPage {
 
 	public $mMode;
 
-	public function __construct() {
+	public function __construct( $name = 'Serverstatus' ) {
 		parent::__construct(
-			"ServerStatus", //
+			$name, //
 			"viewserverstatus",  // rights required to view
-			true // show in Special:SpecialPages
+			false // show in Special:SpecialPages
 		);
 	}
 
-	function execute( $parser = null ) {
+	function execute( $par ) {
+
+		// Only allow users with 'viewserverstatus' right (sysop by default) to access
+		$user = $this->getUser();
+		if ( !$this->userCanExecute( $user ) ) {
+			$this->displayRestrictionError();
+			return;
+		}
 
 		$webRequest = $this->getRequest();
 		$requestedMode = $webRequest->getVal( 'mode', 'httpdstatus' );
@@ -21,7 +28,7 @@ class SpecialServerStatus extends SpecialPage {
 
 		$headerLinks = [];
 		foreach ( $modes as $mode ) {
-			$linkText = wfMessage( 'serverstatus-mode-' . $mode );
+			$linkText = $this->msg( 'serverstatus-mode-' . $mode )->text();
 
 			if ( $mode === $requestedMode ) {
 				$headerLinks[] = Xml::element( 'strong', null, $linkText );
@@ -42,20 +49,20 @@ class SpecialServerStatus extends SpecialPage {
 
 		switch ( $requestedMode ) {
 			case 'httpdinfo':
-				$body = file_get_contents( 'http://127.0.0.1:8090/server-info' );
+				$body = file_get_contents( 'http://127.0.0.1:8090/server-info?' . $webRequest->getVal( 'submode', '' ) );
 				$submodes = [
-					'config'    => '<a href="?config">Configuration Files</a>',
-					'server'    => '<a href="?server">Server Settings</a>'
-					'list'      => '<a href="?list">Module List</a>'
-					'hooks'     => '<a href="?hooks">Active Hooks</a>'
-					'providers' => '<a href="?providers">Available Providers</a>'
+					'config'    => 'Configuration Files',
+					'server'    => 'Server Settings',
+					'list'      => 'Module List',
+					'hooks'     => 'Active Hooks',
+					'providers' => 'Available Providers',
 				];
-				foreach ( $submodes as $submode => $currentLink ) {
+				foreach ( $submodes as $submode => $linkText ) {
 					$body = str_replace(
-						$currentLink,
+						"<a href=\"?$submode\">$linkText</a>",
 						Linker::link(
-							this->getPageTitle(),
-							"Configuration Files",
+							$this->getPageTitle(),
+							$linkText,
 							[], // custom attributes
 							[ 'mode' => 'httpdinfo', 'submode' => $submode ]
 						),
@@ -77,6 +84,9 @@ class SpecialServerStatus extends SpecialPage {
 		}
 
 		$output = $this->getOutput();
+		$output->setPageTitle(
+			$this->msg( strtolower( $this->mName ) )->text()
+		);
 		$output->addHTML( $header . $body );
 
 	}

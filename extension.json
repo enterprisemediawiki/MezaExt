@@ -8,7 +8,7 @@
 	"descriptionmsg": "meza-ext-desc",
 	"type": "other",
 	"SpecialPages": {
-		"ServerStatus": "SpecialServerStatus"
+		"Serverstatus": "SpecialServerStatus"
 	},
 	"MessagesDirs": {
 		"Meza": [
