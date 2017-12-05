@@ -27,7 +27,7 @@ class SpecialServerStatus extends SpecialPage {
 				$headerLinks[] = Xml::element( 'strong', null, $linkText );
 			}
 			else {
-				$headerLinks = Linker::link(
+				$headerLinks[] = Linker::link(
 					$this->getPageTitle(),
 					$linkText,
 					[], // custom attributes
