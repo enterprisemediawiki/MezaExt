@@ -24,6 +24,12 @@
 	"GroupPermissions": {
 		"sysop": {
 			"viewserverstatus": true
+		},
+		"user": {
+			"viewserverstatus": false
+		},
+		"*": {
+			"viewserverstatus": false
 		}
 	},
 	"manifest_version": 1

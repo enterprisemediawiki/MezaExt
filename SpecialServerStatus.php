@@ -43,6 +43,25 @@ class SpecialServerStatus extends SpecialPage {
 		switch ( $requestedMode ) {
 			case 'httpdinfo':
 				$body = file_get_contents( 'http://127.0.0.1:8090/server-info' );
+				$submodes = [
+					'config'    => '<a href="?config">Configuration Files</a>',
+					'server'    => '<a href="?server">Server Settings</a>'
+					'list'      => '<a href="?list">Module List</a>'
+					'hooks'     => '<a href="?hooks">Active Hooks</a>'
+					'providers' => '<a href="?providers">Available Providers</a>'
+				];
+				foreach ( $submodes as $submode => $currentLink ) {
+					$body = str_replace(
+						$currentLink,
+						Linker::link(
+							this->getPageTitle(),
+							"Configuration Files",
+							[], // custom attributes
+							[ 'mode' => 'httpdinfo', 'submode' => $submode ]
+						),
+						$body
+					);
+				}
 				break;
 
 			case 'phpinfo':
