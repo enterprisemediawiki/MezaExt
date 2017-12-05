@@ -1,0 +1,30 @@
+{
+	"name": "Meza",
+	"version": "0.1.0",
+	"author": [
+		"[https://www.mediawiki.org/wiki/User:Jamesmontalvo3 James Montalvo]"
+	],
+	"url": "https://github.com/enterprisemediawiki/extension-meza",
+	"descriptionmsg": "extension-meza-desc",
+	"type": "other",
+	"SpecialPages": {
+		"ServerStatus": "SpecialServerStatus"
+	},
+	"MessagesDirs": {
+		"Meza": [
+			"i18n"
+		]
+	},
+	"AutoloadClasses": {
+		"SpecialServerStatus": "SpecialServerStatus.php"
+	},
+	"AvailableRights": [
+		"viewserverstatus"
+	],
+	"GroupPermissions": {
+		"sysop": {
+			"viewserverstatus": true
+		}
+	},
+	"manifest_version": 1
+}
