@@ -15,25 +15,32 @@ class SpecialServerStatus extends SpecialPage {
 	function execute( $parser = null ) {
 
 		$webRequest = $this->getRequest();
+		$requestedMode = $webRequest->getVal( 'mode', 'httpdstatus' );
 
-		$linkInfo = [
-			'httpdstatus' => 'Apache server status',
-			'httpdinfo' => 'Apache server info',
-			'phpinfo' => 'PHP info',
-		];
+		$modes = [ 'httpdstatus', 'httpdinfo', 'phpinfo' ];
+
+		$headerLinks = [];
+		foreach ( $modes as $mode ) {
+			$linkText = wfMessage( 'serverstatus-mode-' . $mode );
+
+			if ( $mode === $requestedMode ) {
+				$headerLinks[] = Xml::element( 'strong', null, $linkText );
+			}
+			else {
+				$headerLinks = Linker::link(
+					$this->getPageTitle(),
+					$linkText,
+					[], // custom attributes
+					[ 'mode' => $mode ]
+				);
+			}
+		}
 
 		$header = "<div style='background-color:#ddd; padding: 10px; font-weight: bold;'>";
-		foreach ( $linkInfo as $mode => $text ) {
-			$header .= Linker::link(
-				$this->getPageTitle(),
-				$text,
-				[], // custom attributes
-				[ 'mode' => $mode ]
-			);
-		}
+		$header .= implode( ' | ', $headerLinks );
 		$header .= '</div>';
 
-		switch ( $webRequest->getVal( 'mode' ) ) {
+		switch ( $requestedMode ) {
 			case 'httpdinfo':
 				$body = file_get_contents( 'http://127.0.0.1:8090/server-info' );
 				break;
