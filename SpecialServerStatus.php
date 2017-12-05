@@ -14,6 +14,8 @@ class SpecialServerStatus extends SpecialPage {
 
 	function execute( $parser = null ) {
 
+		$webRequest = $this->getRequest();
+
 		$linkInfo = [
 			'httpdstatus' => 'Apache server status',
 			'httpdinfo' => 'Apache server info',
@@ -22,7 +24,7 @@ class SpecialServerStatus extends SpecialPage {
 
 		$header = "<div style='background-color:#ddd; padding: 10px; font-weight: bold;'>";
 		foreach ( $linkInfo as $mode => $text ) {
-			$header .= Linker:link(
+			$header .= Linker::link(
 				$this->getPageTitle(),
 				$text,
 				[], // custom attributes
@@ -31,7 +33,7 @@ class SpecialServerStatus extends SpecialPage {
 		}
 		$header .= '</div>';
 
-		switch ( $requestMode ) {
+		switch ( $webRequest->getVal( 'mode' ) ) {
 			case 'httpdinfo':
 				$body = file_get_contents( 'http://127.0.0.1:8090/server-info' );
 				break;
