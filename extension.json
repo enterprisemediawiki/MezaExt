@@ -8,6 +8,7 @@
 	"descriptionmsg": "meza-ext-desc",
 	"type": "other",
 	"SpecialPages": {
+		"TransferPages": "SpecialTransferPages",
 		"Serverstatus": "SpecialServerStatus"
 	},
 	"MessagesDirs": {
@@ -16,6 +17,7 @@
 		]
 	},
 	"AutoloadClasses": {
+		"SpecialTransferPages": "includes/SpecialTransferPages.php",
 		"SpecialServerStatus": "includes/SpecialServerStatus.php"
 	},
 	"AvailableRights": [

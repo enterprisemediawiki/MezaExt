@@ -49,7 +49,8 @@ class SpecialTransferPages extends SpecialPage {
 
 	public $mMode;
 
-	public function __construct( $name = 'Transfer pages' ) {
+	// public function __construct( $name = 'Transfer pages' ) {
+	public function __construct( $name = 'TransferPages' ) {
 		parent::__construct(
 			$name, //
 			"transferpages",  // rights required to view
@@ -95,15 +96,15 @@ class SpecialTransferPages extends SpecialPage {
 				'name' => 'namespace',
 				'id' => 'ext-meza-namespace-select',
 				'label-message' => 'ext-meza-namespace-selectlabel',
-				'all' => null, // FIXME TRY 'allnamespaces' to give an option for all namespaces,
-				// 'default' => 'all',
+				'all' => 'all',
+				'default' => 'all',
 			],
 			'category' => [
 				'type' => 'text',
 				'name' => 'category',
 				'id' => 'ext-meza-category-textbox',
 				'label-message' => 'ext-meza-category-textboxlabel',
-				'default' => '0',
+				'default' => '',
 				'size' => 20,
 			],
 		];
@@ -117,7 +118,7 @@ class SpecialTransferPages extends SpecialPage {
 			// ->setFooterText( $this->msg( 'ext-meza-mergeitems-footer' )->parse() )
 			// ->setWrapperLegendMsg( 'ext-meza-transferpages-legend' )
 
-			->suppressDefaultSubmit()
+			// ->suppressDefaultSubmit()
 			->setSubmitID( 'ext-meza-transferpages-submit' )
 			->setSubmitName( 'ext-meza-transferpages-submit' )
 			->setSubmitTextMsg( 'ext-meza-transferpages-submit' )
@@ -286,7 +287,7 @@ class SpecialTransferPages extends SpecialPage {
 				wiki_$wiki.page.page_title AS title,
 				wiki_$wiki.revision.rev_sha1 AS sha1
 			FROM wiki_$wiki.page
-			LEFT JOIN wiki_$wiki.revision ON wiki_hsg.page.page_latest = wiki_hsg.revision.rev_id";
+			LEFT JOIN wiki_$wiki.revision ON wiki_$wiki.page.page_latest = wiki_$wiki.revision.rev_id";
 
 		$where = [];
 
@@ -296,7 +297,7 @@ class SpecialTransferPages extends SpecialPage {
 		}
 
 		if ( $namespace !== false ) {
-			$where[] = "wiki_hsg.page.page_namespace = $namespace";
+			$where[] = "wiki_$wiki.page.page_namespace = $namespace";
 		}
 
 		if ( count( $where ) > 0 ) {

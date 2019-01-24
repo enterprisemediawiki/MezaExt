@@ -6,6 +6,11 @@
 	"ext-meza-tranferpages-risk-okay": "Pages identical",
 	"ext-meza-tranferpages-risk-good": "Page on source only",
 
+	"ext-meza-destinationwiki-selectlabel": "Transfer pages to wiki",
+	"ext-meza-namespace-selectlabel": "Namespace",
+	"ext-meza-category-textboxlabel": "Category",
+	"ext-meza-transferpages-submit": "Get transferable pages",
+
 	"serverstatus-mode-httpdstatus": "Apache server status",
 	"serverstatus-mode-httpdinfo": "Apache server info",
 	"serverstatus-mode-phpinfo": "PHP info",
