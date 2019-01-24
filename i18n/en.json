@@ -1,5 +1,11 @@
 {
 	"meza-ext-desc": "Extension to capture all the little things meza (https://github.com/enterprisemediawiki/meza) wants",
+
+	"ext-meza-transferpages-src-dest-links": "$1 (on $2)",
+	"ext-meza-tranferpages-risk-danger": "Page conflicts!",
+	"ext-meza-tranferpages-risk-okay": "Pages identical",
+	"ext-meza-tranferpages-risk-good": "Page on source only",
+
 	"serverstatus-mode-httpdstatus": "Apache server status",
 	"serverstatus-mode-httpdinfo": "Apache server info",
 	"serverstatus-mode-phpinfo": "PHP info",

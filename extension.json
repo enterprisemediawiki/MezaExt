@@ -16,19 +16,23 @@
 		]
 	},
 	"AutoloadClasses": {
-		"SpecialServerStatus": "SpecialServerStatus.php"
+		"SpecialServerStatus": "includes/SpecialServerStatus.php"
 	},
 	"AvailableRights": [
+		"transferpages",
 		"viewserverstatus"
 	],
 	"GroupPermissions": {
 		"sysop": {
+			"transferpages": true,
 			"viewserverstatus": true
 		},
 		"user": {
+			"transferpages": false,
 			"viewserverstatus": false
 		},
 		"*": {
+			"transferpages": false,
 			"viewserverstatus": false
 		}
 	},
