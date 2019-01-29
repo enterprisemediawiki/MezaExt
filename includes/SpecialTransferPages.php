@@ -168,18 +168,6 @@ class SpecialTransferPages extends SpecialPage {
 				$row['num_name_dupes']
 			];
 
-			$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
-
-			$srcLink = $linkRenderer->makeLink( Title::makeTitle( $ns, $titleText ) );
-			$destLink = $linkRenderer->makeLink(
-				Title::makeTitle( $ns, $titleText, '', $destWiki ),
-				new HtmlArmor( $destWiki )
-			);
-
-			$links = $this->msg( 'ext-meza-transferpages-src-dest-links' )
-				->rawParams( $srcLink, $destLink )
-				->text();
-
 			// todo: add logic here to check for change in $isOnDest and
 			// $conflictWithDest, to break the table into three tables. Then can
 			// easily perform actions just against the separate types.
@@ -202,6 +190,24 @@ class SpecialTransferPages extends SpecialPage {
 				$transferRisk = 'good';
 			}
 
+			$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
+
+			$srcLink = $linkRenderer->makeLink( Title::makeTitle( $ns, $titleText ) );
+			if ( $isOnDest ) {
+				$destLink = $linkRenderer->makeLink(
+					Title::makeTitle( $ns, $titleText, '', $destWiki ),
+					new HtmlArmor( $destWiki )
+				);
+				$destLink = $this->msg( 'ext-meza-transferpages-dest-link' )
+					->rawParams( $destLink )
+					->text();
+			}
+			else {
+				$destLink = '';
+			}
+
+			$links = $srcLink . ' ' . $destLink;
+
 			$transferRiskTd = Xml::tags(
 				'td',
 				[ 'class' => 'ext-meza-tranferpages-risk-' . $transferRisk ],
@@ -212,6 +218,15 @@ class SpecialTransferPages extends SpecialPage {
 			// $diff = 'at some point create a good diff view between the pages on each wiki';
 
 			$transferPage = "[x] transfer page";
+			$transferPage = new HTMLCheckField( [
+				'fieldname' => 'testtest',
+				'name' => 'testtest',
+				'type' => 'check',
+				'id' => 'ext-meza-destinationwiki-checktest',
+				'label-message' => 'ext-meza-destinationwiki-checktest',
+			]->getInline( 'test' );
+
+
 			$srcAction = "[ ] delete [ ] redirect [ ] do nothing";
 
 
@@ -226,7 +241,7 @@ class SpecialTransferPages extends SpecialPage {
 		}
 		$html .= "</table>";
 
-		$output->addHTML( $html );
+		$output->prependHTML( $html );
 	}
 
 

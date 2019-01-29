@@ -1,7 +1,7 @@
 {
 	"meza-ext-desc": "Extension to capture all the little things meza (https://github.com/enterprisemediawiki/meza) wants",
 
-	"ext-meza-transferpages-src-dest-links": "$1 (on $2)",
+	"ext-meza-transferpages-dest-link": "(on $1)",
 	"ext-meza-transferpages-risk-danger": "Page conflicts!",
 	"ext-meza-transferpages-risk-okay": "Pages identical",
 	"ext-meza-transferpages-risk-good": "Page on source only",
