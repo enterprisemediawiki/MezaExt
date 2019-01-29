@@ -141,6 +141,8 @@ class SpecialTransferPages extends SpecialPage {
 		$dbr = wfGetDB( DB_SLAVE );
 		$res = $dbr->query( $query, __METHOD__ );
 
+		$destWiki = $this->getRequest()->getVal( 'destinationwiki' );
+
 		$numRows = 0;
 		#
 		#
@@ -301,7 +303,7 @@ class SpecialTransferPages extends SpecialPage {
 		}
 
 		if ( count( $where ) > 0 ) {
-			$query .= "\n" . implode( ' AND ', $where );
+			$query .= "\nWHERE " . implode( ' AND ', $where );
 		}
 
 		return $query;
