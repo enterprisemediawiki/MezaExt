@@ -221,7 +221,7 @@ class SpecialTransferPages extends SpecialPage {
 
 			$srcAction = $this->queryTableRadio( 'srcaction', 'deletesrc', $numRows )
 				. ' ' .  $this->queryTableRadio( 'srcaction', 'redirectsrc', $numRows )
-				. ' ' .  $this->queryTableRadio( 'srcaction', 'donothingsrc', $numRows );
+				. ' ' .  $this->queryTableRadio( 'srcaction', 'donothingsrc', $numRows, true );
 
 			$html .= "<tr>
 					<td>$links</td>
@@ -262,7 +262,7 @@ class SpecialTransferPages extends SpecialPage {
 			$checked = '';
 		}
 
-		return "<input type='radio' name='$groupname' id='$groupname-$value-$num' class='$groupname $groupname-$value $groupname-$num' value='$value' $checked>
+		return "<input type='radio' name='$groupname-$num' id='$groupname-$value-$num' class='$groupname $groupname-$value $groupname-$num' value='$value' $checked>
 			<label for='$groupname-$value-$num'>$text</label>";
 	}
 
