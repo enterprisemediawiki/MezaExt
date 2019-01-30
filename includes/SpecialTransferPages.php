@@ -247,7 +247,7 @@ class SpecialTransferPages extends SpecialPage {
 			<label for='$type$num'>$text</label>";
 	}
 
-	public function queryTableRadio( $name, $value, $num, $checked=false ) {
+	public function queryTableRadio( $groupname, $value, $num, $checked=false ) {
 		$textMsgs = [
 			'deletesrc' => 'delete',
 			'redirectsrc' => 'redirect',
@@ -262,8 +262,8 @@ class SpecialTransferPages extends SpecialPage {
 			$checked = '';
 		}
 
-		return "<input type='radio' name='$name' id='$name$num' class='$name $name$value' value='$value' $checked>
-			<label for='$name$num'>$text</label>";
+		return "<input type='radio' name='$groupname' id='$groupname-$value-$num' class='$groupname $groupname-$value $groupname-$num' value='$value' $checked>
+			<label for='$groupname-$value-$num'>$text</label>";
 	}
 
 	public function buildTransferablePagesQuery() {
