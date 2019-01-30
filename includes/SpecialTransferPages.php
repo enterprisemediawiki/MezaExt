@@ -217,18 +217,11 @@ class SpecialTransferPages extends SpecialPage {
 
 			// $diff = 'at some point create a good diff view between the pages on each wiki';
 
-			$transferPage = "[x] transfer page";
-			$transferPage = new HTMLCheckField( [
-				'fieldname' => 'testtest',
-				'name' => 'testtest',
-				'type' => 'check',
-				'id' => 'ext-meza-destinationwiki-checktest',
-				'label-message' => 'ext-meza-destinationwiki-checktest',
-			]->getInline( 'test' );
+			$transferPage = "<input type='checkbox' name='dotransfer$numRows' value='1'><label for='dotransfer$numRows'>transfer page</label> ";
 
-
-			$srcAction = "[ ] delete [ ] redirect [ ] do nothing";
-
+			$srcAction = "<input type='checkbox' name='deletesrc$numRows' value='1'><label for='deletesrc$numRows'>delete</label>
+				<input type='checkbox' name='redirectsrc$numRows' value='1'><label for='redirectsrc$numRows'>redirect</label>
+				<input type='checkbox' name='donothingsrc$numRows' value='1'><label for='donothingsrc$numRows'>do nothing</label> ";
 
 			$html .= "<tr>
 					<td>$links</td>
