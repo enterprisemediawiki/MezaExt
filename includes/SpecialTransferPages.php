@@ -217,11 +217,11 @@ class SpecialTransferPages extends SpecialPage {
 
 			// $diff = 'at some point create a good diff view between the pages on each wiki';
 
-			$transferPage = "<input type='checkbox' name='dotransfer$numRows' value='1'><label for='dotransfer$numRows'>transfer page</label> ";
+			$transferPage = $this->queryTableCheckbox( 'dotransfer', $numRows );
 
-			$srcAction = "<input type='checkbox' name='deletesrc$numRows' value='1'><label for='deletesrc$numRows'>delete</label>
-				<input type='checkbox' name='redirectsrc$numRows' value='1'><label for='redirectsrc$numRows'>redirect</label>
-				<input type='checkbox' name='donothingsrc$numRows' value='1'><label for='donothingsrc$numRows'>do nothing</label> ";
+			$srcAction = $this->queryTableRadio( 'srcaction', 'deletesrc', $numRows )
+				. ' ' .  $this->queryTableRadio( 'srcaction', 'redirectsrc', $numRows )
+				. ' ' .  $this->queryTableRadio( 'srcaction', 'donothingsrc', $numRows )
 
 			$html .= "<tr>
 					<td>$links</td>
@@ -237,6 +237,27 @@ class SpecialTransferPages extends SpecialPage {
 		$output->prependHTML( $html );
 	}
 
+	public function queryTableCheckbox( $type, $num ) {
+		$textMsgs = [
+			'dotransfer' => 'transfer page',
+		];
+		$text = $textMsgs[$type];
+
+		return "<input type='checkbox' name='$type$num' id='$type$num' class='$type' value='1'>
+			<label for='$type$num'>$text</label>";
+	}
+
+	public function queryTableRadio( $name, $value, $num ) {
+		$textMsgs = [
+			'deletesrc' => 'delete',
+			'redirectsrc' => 'redirect',
+			'donothingsrc' => 'do nothing',
+		];
+		$text = $textMsgs[$value];
+
+		return "<input type='radio' name='$name' id='$name$num' class='$name $name$value' value='$value'>
+			<label for='$name$num'>$text</label>";
+	}
 
 	public function buildTransferablePagesQuery() {
 
