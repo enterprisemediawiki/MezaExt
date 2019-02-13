@@ -9,7 +9,7 @@
 	"ext-meza-destinationwiki-selectlabel": "Transfer pages to wiki",
 	"ext-meza-namespace-selectlabel": "Namespace",
 	"ext-meza-category-textboxlabel": "Category",
-	"ext-meza-transferpages-submit": "Get transferable pages",
+	"ext-meza-transferpages-setup-submit": "Get transferable pages",
 
 	"serverstatus-mode-httpdstatus": "Apache server status",
 	"serverstatus-mode-httpdinfo": "Apache server info",

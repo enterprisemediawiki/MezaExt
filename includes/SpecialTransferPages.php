@@ -73,15 +73,31 @@ class SpecialTransferPages extends SpecialPage {
 			return;
 		}
 
-		// $webRequest = $this->getRequest();
+		$webRequest = $this->getRequest();
 
-		$this->setupTransferForm();
+		// show list of transferable pages
+		if ( isset( $webRequest->getVal( 'ext-meza-transferpages-setup-submit' ) ) ) {
+
+			// still show the pages/wiki selection form in addition to list of pages
+			$this->renderTransferPagesSetupForm();
+
+			// table of pages to transfer
+			$this->queryTransferablePages();
+
+		// perform transfer operation
+		} elseif ( isset( $webRequest->getVal( 'ext-meza-transferpages-dotransfer-submit' ) ) ) {
+
+			$this->doTransfer();
+
+		} else {
+			// show form to select which namespaces/categories to transfer, and
+			// what wiki to transfer them to. This will
+			$this->renderTransferPagesSetupForm();
+		}
 
 	}
 
-
-
-	public function setupTransferForm () {
+	public function renderTransferPagesSetupForm () {
 
 		$formDescriptor = [
 			'destinationwiki' => [
@@ -119,11 +135,12 @@ class SpecialTransferPages extends SpecialPage {
 			// ->setWrapperLegendMsg( 'ext-meza-transferpages-legend' )
 
 			// ->suppressDefaultSubmit()
-			->setSubmitID( 'ext-meza-transferpages-submit' )
-			->setSubmitName( 'ext-meza-transferpages-submit' )
-			->setSubmitTextMsg( 'ext-meza-transferpages-submit' )
+			->setSubmitID( 'ext-meza-transferpages-setup-submit' )
+			->setSubmitName( 'ext-meza-transferpages-setup-submit' )
+			->setSubmitTextMsg( 'ext-meza-transferpages-setup-submit' )
 
-			->setSubmitCallback( [ $this, 'queryTransferablePages' ] )
+			// why do this versus have logic in execute() ???
+			// ->setSubmitCallback( [ $this, 'queryTransferablePages' ] )
 
 			->prepareForm()
 			// ->getHTML( '' ); RETURNS RAW HTML OF FORM...
@@ -143,6 +160,9 @@ class SpecialTransferPages extends SpecialPage {
 
 		$destWiki = $this->getRequest()->getVal( 'destinationwiki' );
 
+		$formid = 'ext-meza-transferpages-form2';
+		$action = $this->getPageTitle()->getLocalURL();
+
 		$numRows = 0;
 		#
 		#
@@ -150,6 +170,7 @@ class SpecialTransferPages extends SpecialPage {
 		#
 		#
 		$html = "<br />
+			<form id='$formid' action='$action' method='post' enctype='application/x-www-form-urlencoded'>
 			<table class='sortable wikitable jquery-tablesorter' style='width:100%;'>
 			<tr>
 				<th>Page</th>
@@ -233,6 +254,14 @@ class SpecialTransferPages extends SpecialPage {
 			$numRows++;
 		}
 		$html .= "</table>";
+		$html .= '<button
+			type="submit"
+			tabindex="0"
+			aria-disabled="false"
+			name="ext-meza-transferpages-dotransfer-submit"
+			value="Get transferable pages"
+			></button>';
+		$html .= "</form>";
 
 		$output->prependHTML( $html );
 	}
@@ -361,6 +390,12 @@ class SpecialTransferPages extends SpecialPage {
 			}
 		}
 		return $validDests;
+	}
+
+	public function doTransfer () {
+		$vars = $this->getRequest()->getValues();
+
+		$this->getOutput()->addHTML( '<pre>' . print_r( $vars, true ) . '</pre>' );
 	}
 
 }
