@@ -181,9 +181,10 @@ class SpecialTransferPages extends SpecialPage {
 
 		while( $row = $dbr->fetchRow( $res ) ) {
 
-			list($ns, $titleText, $wikis, $numContentUniques, $numNameDupes) = [
+			list($ns, $titleText, $srcId, $wikis, $numContentUniques, $numNameDupes) = [
 				$row['ns'],
 				$row['title'],
+				$row['src_id'],
 				$row['wikis'],
 				$row['num_content_uniques'],
 				$row['num_name_dupes']
@@ -238,13 +239,14 @@ class SpecialTransferPages extends SpecialPage {
 
 			// $diff = 'at some point create a good diff view between the pages on each wiki';
 
-			$transferPage = $this->queryTableCheckbox( 'dotransfer', $numRows );
+			$transferPage = $this->queryTableCheckbox( 'dotransfer', $srcId );
 
-			$srcAction = $this->queryTableRadio( 'srcaction', 'deletesrc', $numRows )
-				. ' ' .  $this->queryTableRadio( 'srcaction', 'redirectsrc', $numRows )
-				. ' ' .  $this->queryTableRadio( 'srcaction', 'donothingsrc', $numRows, true );
+			$srcAction = $this->queryTableRadio( 'srcaction', 'deletesrc', $srcId )
+				. ' ' .  $this->queryTableRadio( 'srcaction', 'redirectsrc', $srcId )
+				. ' ' .  $this->queryTableRadio( 'srcaction', 'donothingsrc', $srcId, true );
 
 			$html .= "<tr>
+					<input type='hidden' name='transferids[]' value='$srcId' />
 					<td>$links</td>
 					$transferRiskTd
 					<td>$transferPage</td>
@@ -310,8 +312,8 @@ class SpecialTransferPages extends SpecialPage {
 			$namespace = false;
 		}
 
-		$srcQuery = $this->getWikiQueryPart( $srcWiki, $category, $namespace );
-		$destQuery = $this->getWikiQueryPart( $destWiki, $category, $namespace );
+		$srcQuery = $this->getWikiQueryPart( $srcWiki, $category, $namespace, true );
+		$destQuery = $this->getWikiQueryPart( $destWiki, $category, $namespace, false );
 
 		// WHERE wikis != '$destWiki':
 		//   Don't show pages that only exist on the destination wiki since we
@@ -324,6 +326,7 @@ class SpecialTransferPages extends SpecialPage {
 				SELECT
 					ns,
 					title,
+					SUM( id ) AS src_id,
 					GROUP_CONCAT( wiki separator ',' ) AS wikis,
 					COUNT( DISTINCT sha1 ) AS num_content_uniques,
 					COUNT( * ) AS num_name_dupes
@@ -345,13 +348,22 @@ class SpecialTransferPages extends SpecialPage {
 
 	}
 
-	public function getWikiQueryPart ( $wiki, $category, $namespace ) {
+	public function getWikiQueryPart ( $wiki, $category, $namespace, $getPageId ) {
+
+		// for destination wiki give an ID of zero. This can be summed with the
+		// source wiki's ID to easily/quickly get the source wiki's page ID.
+		if ( $getPageId ) {
+			$pageIdQuery = "wiki_$wiki.page.page_id AS id";
+		} else {
+			$pageIdQuery = "0 as ID";
+		}
 
 		$query =
 			"SELECT
 				'$wiki' AS wiki,
 				wiki_$wiki.page.page_namespace AS ns,
 				wiki_$wiki.page.page_title AS title,
+				$pageIdQuery,
 				wiki_$wiki.revision.rev_sha1 AS sha1
 			FROM wiki_$wiki.page
 			LEFT JOIN wiki_$wiki.revision ON wiki_$wiki.page.page_latest = wiki_$wiki.revision.rev_id";
