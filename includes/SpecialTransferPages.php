@@ -48,8 +48,8 @@ use MediaWiki\MediaWikiServices;
 class SpecialTransferPages extends SpecialPage {
 
 	public $mMode;
-	public $pageListForDump = '/opt/data-meza/tmp/mezaExt-TransferPages-pagelist';
-	public $pageDumpOutputXML = '/opt/data-meza/tmp/mezaExt-TransferPages-pageDumpOutputXML';
+	public $pageListForDump = '/opt/data-meza/mw-temp/mezaExt-TransferPages-pagelist';
+	public $pageDumpOutputXML = '/opt/data-meza/mw-temp/mezaExt-TransferPages-pageDumpOutputXML';
 	public $maintDir = '/opt/htdocs/mediawiki/maintenance/';
 
 	// public function __construct( $name = 'Transfer pages' ) {
@@ -461,11 +461,15 @@ class SpecialTransferPages extends SpecialPage {
 
 	public function dumpPageXML ( Title $title, $sourceWiki ) {
 		$page = $title->getFullText();
-		$this->output( "\nDump XML for wiki '$sourceWiki' page '$page'\n" );
+		$this->getOutput()->addHTML( "\nDump XML for wiki '$sourceWiki' page '$page'\n" );
 
 		// remove existing files
-		unlink( $this->pageListForDump );
-		unlink( $this->pageDumpOutputXML );
+		if ( file_exists( $this->pageListForDump ) ) {
+			unlink( $this->pageListForDump );
+		}
+		if ( file_exists( $this->pageDumpOutputXML ) ) {
+			unlink( $this->pageDumpOutputXML );
+		}
 
 		file_put_contents( $this->pageListForDump, $page );
 		shell_exec( "WIKI=$sourceWiki php {$this->maintDir}dumpBackup.php --full --logs --uploads --include-files --pagelist={$this->pageListForDump} > {$this->pageDumpOutputXML}" );
@@ -473,8 +477,8 @@ class SpecialTransferPages extends SpecialPage {
 
 	// FIXME ___maybe___ remove the --no-updates flag? Or do updates in bulk after all pages processed?
 	public function importXML ( $destWiki ) {
-		$this->output( "\nImport XML into wiki '$destWiki'\n" );
-		shell_exec( "WIKI=$destWiki php {$this->maintDir}importDump.php --no-updates --uploads --debug --report=100 < {$this->pageDumpOutputXML}" );
+		$this->getOutput()->addHTML( "\nImport XML into wiki '$destWiki'\n" );
+		shell_exec( "WIKI=$destWiki php {$this->maintDir}importDump.php --no-updates --username-prefix=\"\" --uploads --debug --report=100 < {$this->pageDumpOutputXML}" );
 	}
 
 	public function deletePageFromSource ( Title $title, $srcWiki ) {
