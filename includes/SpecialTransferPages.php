@@ -76,7 +76,7 @@ class SpecialTransferPages extends SpecialPage {
 		$webRequest = $this->getRequest();
 
 		// show list of transferable pages
-		if ( isset( $webRequest->getVal( 'ext-meza-transferpages-setup-submit' ) ) ) {
+		if ( $webRequest->getVal( 'ext-meza-transferpages-setup-submit' ) !== null ) {
 
 			// still show the pages/wiki selection form in addition to list of pages
 			$this->renderTransferPagesSetupForm();
@@ -85,7 +85,7 @@ class SpecialTransferPages extends SpecialPage {
 			$this->queryTransferablePages();
 
 		// perform transfer operation
-		} elseif ( isset( $webRequest->getVal( 'ext-meza-transferpages-dotransfer-submit' ) ) ) {
+		} elseif ( $webRequest->getVal( 'ext-meza-transferpages-dotransfer-submit' ) !== null ) {
 
 			$this->doTransfer();
 
@@ -141,12 +141,15 @@ class SpecialTransferPages extends SpecialPage {
 
 			// why do this versus have logic in execute() ???
 			// ->setSubmitCallback( [ $this, 'queryTransferablePages' ] )
+			->setSubmitCallback( [ $this, 'dummy' ] )
 
 			->prepareForm()
 			// ->getHTML( '' ); RETURNS RAW HTML OF FORM...
 			->show();
 
 	}
+
+	public function dummy () {}
 
 	public function queryTransferablePages() {
 		$output = $this->getOutput();
@@ -262,7 +265,7 @@ class SpecialTransferPages extends SpecialPage {
 			aria-disabled="false"
 			name="ext-meza-transferpages-dotransfer-submit"
 			value="Get transferable pages"
-			></button>';
+			>Do transfer</button>';
 		$html .= "</form>";
 
 		$output->prependHTML( $html );
