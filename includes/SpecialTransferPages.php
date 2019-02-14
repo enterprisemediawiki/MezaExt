@@ -48,6 +48,9 @@ use MediaWiki\MediaWikiServices;
 class SpecialTransferPages extends SpecialPage {
 
 	public $mMode;
+	public $pageListForDump = '/opt/data-meza/tmp/mezaExt-TransferPages-pagelist';
+	public $pageDumpOutputXML = '/opt/data-meza/tmp/mezaExt-TransferPages-pageDumpOutputXML';
+	public $maintDir = '/opt/htdocs/mediawiki/maintenance/';
 
 	// public function __construct( $name = 'Transfer pages' ) {
 	public function __construct( $name = 'TransferPages' ) {
@@ -174,6 +177,7 @@ class SpecialTransferPages extends SpecialPage {
 		#
 		$html = "<br />
 			<form id='$formid' action='$action' method='post' enctype='application/x-www-form-urlencoded'>
+			<input type='hidden' name='destinationwiki' value='$destWiki' />
 			<table class='sortable wikitable jquery-tablesorter' style='width:100%;'>
 			<tr>
 				<th>Page</th>
@@ -416,15 +420,23 @@ class SpecialTransferPages extends SpecialPage {
 		$vars = $this->getRequest()->getValues();
 		// $transferPages = isset( $vars['dotransfer'] ) ? $vars['dotransfer'] : [];
 
+		$destWiki = $vars['destinationwiki'];
+
 		$titles = Title::newFromIDs( array_keys( $vars['dotransfer'] ) );
 
 		$output = "<ul>";
 		// foreach ( $vars['transferids'] as $pageId ) {
 		foreach ( $titles as $title ) {
 			$id = $title->getArticleID();
+			$srcAction = $vars['srcaction'][$id];
+
 			$output .= '<li>';
-			$output .= 'Transfer ' . $linkRenderer->makeLink( $title ) . ' and ' . $vars['srcaction'][$id];
+			$output .= 'Transfer ' . $linkRenderer->makeLink( $title ) . ' and ' . $srcAction;
 			$output .= '</li>';
+
+			global $wikiId;
+			$this->processPageTransfer( $title, $wikiId, $destWiki, $srcAction );
+
 		}
 		$output .= '</ul>';
 		$this->getOutput()->addHTML( $output );
@@ -432,4 +444,44 @@ class SpecialTransferPages extends SpecialPage {
 		// $this->getOutput()->addHTML( '<pre>' . print_r( $titles, true ) . '</pre>' );
 	}
 
+	public function processPageTransfer ( Title $title, $srcWiki, $destWiki, $srcAction ) {
+		$this->dumpPageXML( $title, $srcWiki );
+
+		// run importDump.php on dest
+		$this->importXML( $destWiki );
+
+		// perform source post-transfer action (delete, redirect, etc)
+		if ( $srcAction === 'deletesrc' ) {
+			$this->deletePageFromSource( $title, $srcWiki );
+		} elseif ( $srcAction === 'redirectsrc' ) {
+			$this->redirectSourceToDest( $title, $srcWiki, $destWiki );
+		}
+		// else do nothing
+	}
+
+	public function dumpPageXML ( Title $title, $sourceWiki ) {
+		$page = $title->getFullText();
+		$this->output( "\nDump XML for wiki '$sourceWiki' page '$page'\n" );
+
+		// remove existing files
+		unlink( $this->pageListForDump );
+		unlink( $this->pageDumpOutputXML );
+
+		file_put_contents( $this->pageListForDump, $page );
+		shell_exec( "WIKI=$sourceWiki php {$this->maintDir}dumpBackup.php --full --logs --uploads --include-files --pagelist={$this->pageListForDump} > {$this->pageDumpOutputXML}" );
+	}
+
+	// FIXME ___maybe___ remove the --no-updates flag? Or do updates in bulk after all pages processed?
+	public function importXML ( $destWiki ) {
+		$this->output( "\nImport XML into wiki '$destWiki'\n" );
+		shell_exec( "WIKI=$destWiki php {$this->maintDir}importDump.php --no-updates --uploads --debug --report=100 < {$this->pageDumpOutputXML}" );
+	}
+
+	public function deletePageFromSource ( Title $title, $srcWiki ) {
+
+	}
+
+	public function redirectSourceToDest ( Title $title, $srcWiki, $destWiki ) {
+
+	}
 }
