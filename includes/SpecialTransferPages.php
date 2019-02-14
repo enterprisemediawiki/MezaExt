@@ -277,7 +277,8 @@ class SpecialTransferPages extends SpecialPage {
 		];
 		$text = $textMsgs[$type];
 
-		return "<input type='checkbox' name='$type$num' id='$type$num' class='$type' value='1'>
+		$name = $type . '[' . $num . ']';
+		return "<input type='checkbox' name='$name' id='$type$num' class='$type' value='1'>
 			<label for='$type$num'>$text</label>";
 	}
 
@@ -296,7 +297,9 @@ class SpecialTransferPages extends SpecialPage {
 			$checked = '';
 		}
 
-		return "<input type='radio' name='$groupname-$num' id='$groupname-$value-$num' class='$groupname $groupname-$value $groupname-$num' value='$value' $checked>
+		$name = $groupname . '[' . $num . ']';
+
+		return "<input type='radio' name='$name' id='$groupname-$value-$num' class='$groupname $groupname-$value $groupname-$num' value='$value' $checked>
 			<label for='$groupname-$value-$num'>$text</label>";
 	}
 
@@ -408,9 +411,25 @@ class SpecialTransferPages extends SpecialPage {
 	}
 
 	public function doTransfer () {
-		$vars = $this->getRequest()->getValues();
+		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 
-		$this->getOutput()->addHTML( '<pre>' . print_r( $vars, true ) . '</pre>' );
+		$vars = $this->getRequest()->getValues();
+		// $transferPages = isset( $vars['dotransfer'] ) ? $vars['dotransfer'] : [];
+
+		$titles = Title::newFromIDs( array_keys( $vars['dotransfer'] ) );
+
+		$output = "<ul>";
+		// foreach ( $vars['transferids'] as $pageId ) {
+		foreach ( $titles as $title ) {
+			$id = $title->getArticleID();
+			$output .= '<li>';
+			$output .= 'Transfer ' . $linkRenderer->makeLink( $title ) . ' and ' . $vars['srcaction'][$id];
+			$output .= '</li>';
+		}
+		$output .= '</ul>';
+		$this->getOutput()->addHTML( $output );
+
+		// $this->getOutput()->addHTML( '<pre>' . print_r( $titles, true ) . '</pre>' );
 	}
 
 }
