@@ -117,7 +117,7 @@ class SpecialTransferPages extends SpecialPage {
 				'type' => 'select',
 				'id' => 'ext-meza-destinationwiki-select',
 				'label-message' => 'ext-meza-destinationwiki-selectlabel',
-				'default' => array_key_first( $wikis ),
+				'default' => array_keys( $wikis )[0],
 				'options' => $wikis,
 			],
 			'namespace' => [
@@ -260,11 +260,11 @@ class SpecialTransferPages extends SpecialPage {
 				. ' ' .  $this->queryTableRadio( 'srcaction', 'donothingsrc', $srcId, true );
 
 			// removed: <input type='hidden' name='transferids[]' value='$srcId' />
+			// removed: $transferRiskTd (FIXME: remove logic generating this)
 			$rowHtml = "<tr>
 					<td>$links</td>
-					$transferRiskTd
-					<td>$transferPage</td>
-					<td>$srcAction</td>
+					<td style='white-space: nowrap;'>$transferPage</td>
+					<td style='white-space: nowrap;'>$srcAction</td>
 				</tr>";
 
 			if ( $transferRisk === 'danger' ) {
@@ -278,10 +278,10 @@ class SpecialTransferPages extends SpecialPage {
 			$numRows++;
 		}
 
+		// removed: <th>Transfer risk</th>
 		$tableStart = "<table class='sortable wikitable jquery-tablesorter' style='width:100%;'>
 			<tr>
 				<th>Page</th>
-				<th>Transfer risk</th>
 				<th>Do transfer</th>
 				<th>Action on source wiki</th>
 			</tr>";
@@ -291,8 +291,7 @@ class SpecialTransferPages extends SpecialPage {
 		# FIXME i18n
 		#
 		#
-		$html = "<br />
-			<form id='$formid' action='$action' method='post' enctype='application/x-www-form-urlencoded'>
+		$html = "<form id='$formid' action='$action' method='post' enctype='application/x-www-form-urlencoded'>
 			<input type='hidden' name='destinationwiki' value='$destWiki' />";
 
 
@@ -302,14 +301,21 @@ class SpecialTransferPages extends SpecialPage {
 			'unique' => $pagesSourceOnly
 		];
 		foreach ( $pageTables as $msgPart => $pages ) {
+			$collapse = $msgPart === 'unique' ? '' : ' mw-collapsed';
+
 			$html .= Xml::element(
 					'h3',
 					[],
 					$this->msg( 'ext-meza-transferpages-' . $msgPart . '-header' )
-						->params( )
-						->parse( count( $pagesConflict ) )
+						->params( count( $pages ) )
+						->parse()
 				);
-			$html .= $tableStart . implode( '', $pages ) . '</table>';
+			$html .= '<div class="mw-collapsible' . $collapse . '">';
+			// $html .= '<span class="mw-collapsible-toggle" style="float:none;">Expand</span>';
+			$html .= '<div class="mw-collapsible-content">' .
+				$tableStart . implode( '', $pages ) . '</table>'
+				. '</div>';
+			$html .= '</div>';
 		}
 
 		$html .= '<button
