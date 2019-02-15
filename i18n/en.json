@@ -6,6 +6,11 @@
 	"ext-meza-transferpages-risk-okay": "Pages identical",
 	"ext-meza-transferpages-risk-good": "Page on source only",
 
+	"ext-meza-transferpages-transferring-summary": "The following jobs were added to the job queue to transfer pages from this wiki to $1:",
+	"ext-meza-transferpages-transferring-deletesrc": "Transferring [[$1]] to '[[$2:$1|$2]]' and deleting page from this wiki",
+	"ext-meza-transferpages-transferring-redirectsrc": "Transferring [[$1]] to '[[$2:$1|$2]]' and redirecting this wiki's page there",
+	"ext-meza-transferpages-transferring-donothingsrc": "Transferring [[$1]] to '[[$2:$1|$2]]' and leaving this wiki unchanged",
+
 	"ext-meza-destinationwiki-selectlabel": "Transfer pages to wiki",
 	"ext-meza-namespace-selectlabel": "Namespace",
 	"ext-meza-category-textboxlabel": "Category",

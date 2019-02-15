@@ -17,8 +17,12 @@
 		]
 	},
 	"AutoloadClasses": {
+		"MezaTransferPageJob": "includes/MezaTransferPageJob.php",
 		"SpecialTransferPages": "includes/SpecialTransferPages.php",
 		"SpecialServerStatus": "includes/SpecialServerStatus.php"
+	},
+	"JobClasses": {
+		"mezaTransferPage": "MezaTransferPageJob"
 	},
 	"AvailableRights": [
 		"transferpages",

@@ -48,9 +48,6 @@ use MediaWiki\MediaWikiServices;
 class SpecialTransferPages extends SpecialPage {
 
 	public $mMode;
-	public $pageListForDump = '/opt/data-meza/mw-temp/mezaExt-TransferPages-pagelist';
-	public $pageDumpOutputXML = '/opt/data-meza/mw-temp/mezaExt-TransferPages-pageDumpOutputXML';
-	public $maintDir = '/opt/htdocs/mediawiki/maintenance/';
 
 	// public function __construct( $name = 'Transfer pages' ) {
 	public function __construct( $name = 'TransferPages' ) {
@@ -252,8 +249,8 @@ class SpecialTransferPages extends SpecialPage {
 				. ' ' .  $this->queryTableRadio( 'srcaction', 'redirectsrc', $srcId )
 				. ' ' .  $this->queryTableRadio( 'srcaction', 'donothingsrc', $srcId, true );
 
+			// removed: <input type='hidden' name='transferids[]' value='$srcId' />
 			$html .= "<tr>
-					<input type='hidden' name='transferids[]' value='$srcId' />
 					<td>$links</td>
 					$transferRiskTd
 					<td>$transferPage</td>
@@ -420,72 +417,46 @@ class SpecialTransferPages extends SpecialPage {
 		$vars = $this->getRequest()->getValues();
 		// $transferPages = isset( $vars['dotransfer'] ) ? $vars['dotransfer'] : [];
 
+		global $wikiId;
 		$destWiki = $vars['destinationwiki'];
-
 		$titles = Title::newFromIDs( array_keys( $vars['dotransfer'] ) );
 
-		$output = "<ul>";
-		// foreach ( $vars['transferids'] as $pageId ) {
+		$jobs = [];
+
+		$output = $this->msg( 'ext-meza-transferpages-transferring-summary' )
+			->params( $destWiki )
+			->text();
+		$output .= "<ul>";
+
 		foreach ( $titles as $title ) {
 			$id = $title->getArticleID();
 			$srcAction = $vars['srcaction'][$id];
 
 			$output .= '<li>';
-			$output .= 'Transfer ' . $linkRenderer->makeLink( $title ) . ' and ' . $srcAction;
+			$output .= $this->msg( 'ext-meza-transferpages-transferring-' . $srcAction )
+					->params( $title->getFullText(), $destWiki )
+					->parse() .
 			$output .= '</li>';
 
-			global $wikiId;
-			$this->processPageTransfer( $title, $wikiId, $destWiki, $srcAction );
+			// prep the jobs
+			$jobs[] = new MezaTransferPageJob(
+				$title,
+				[
+					'src' => $wikiId,
+					'dest' => $destWiki,
+					'srcAction' => $srcAction,
+				]
+			);
 
 		}
 		$output .= '</ul>';
+
+		JobQueueGroup::singleton()->push( $jobs );
+
 		$this->getOutput()->addHTML( $output );
+
 
 		// $this->getOutput()->addHTML( '<pre>' . print_r( $titles, true ) . '</pre>' );
 	}
 
-	public function processPageTransfer ( Title $title, $srcWiki, $destWiki, $srcAction ) {
-		$this->dumpPageXML( $title, $srcWiki );
-
-		// run importDump.php on dest
-		$this->importXML( $destWiki );
-
-		// perform source post-transfer action (delete, redirect, etc)
-		if ( $srcAction === 'deletesrc' ) {
-			$this->deletePageFromSource( $title, $srcWiki );
-		} elseif ( $srcAction === 'redirectsrc' ) {
-			$this->redirectSourceToDest( $title, $srcWiki, $destWiki );
-		}
-		// else do nothing
-	}
-
-	public function dumpPageXML ( Title $title, $sourceWiki ) {
-		$page = $title->getFullText();
-		$this->getOutput()->addHTML( "\nDump XML for wiki '$sourceWiki' page '$page'\n" );
-
-		// remove existing files
-		if ( file_exists( $this->pageListForDump ) ) {
-			unlink( $this->pageListForDump );
-		}
-		if ( file_exists( $this->pageDumpOutputXML ) ) {
-			unlink( $this->pageDumpOutputXML );
-		}
-
-		file_put_contents( $this->pageListForDump, $page );
-		shell_exec( "WIKI=$sourceWiki php {$this->maintDir}dumpBackup.php --full --logs --uploads --include-files --pagelist={$this->pageListForDump} > {$this->pageDumpOutputXML}" );
-	}
-
-	// FIXME ___maybe___ remove the --no-updates flag? Or do updates in bulk after all pages processed?
-	public function importXML ( $destWiki ) {
-		$this->getOutput()->addHTML( "\nImport XML into wiki '$destWiki'\n" );
-		shell_exec( "WIKI=$destWiki php {$this->maintDir}importDump.php --no-updates --username-prefix=\"\" --uploads --debug --report=100 < {$this->pageDumpOutputXML}" );
-	}
-
-	public function deletePageFromSource ( Title $title, $srcWiki ) {
-
-	}
-
-	public function redirectSourceToDest ( Title $title, $srcWiki, $destWiki ) {
-
-	}
 }
