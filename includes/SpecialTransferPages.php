@@ -60,6 +60,8 @@ class SpecialTransferPages extends SpecialPage {
 
 	function execute( $par ) {
 
+		$this->getOutput()->setPageTitle( 'Transfer pages' );  // FIXME i18n
+
 		# from cross wiki diff
 		// $this->getOutput()->addModules( 'ext.nasaspecifics.crosswikidiff' );
 		// $this->duplicatedPages();
@@ -99,13 +101,24 @@ class SpecialTransferPages extends SpecialPage {
 
 	public function renderTransferPagesSetupForm () {
 
+		$this->getOutput()->addHTML(
+			Xml::element(
+				'h2',
+				[],
+				$this->msg( 'ext-meza-transferpages-setupheader' )->parse()
+			)
+		);
+
+		$wikis = $this->getValidDestinationWikis();
+
 		$formDescriptor = [
 			'destinationwiki' => [
 				'name' => 'destinationwiki',
 				'type' => 'select',
 				'id' => 'ext-meza-destinationwiki-select',
 				'label-message' => 'ext-meza-destinationwiki-selectlabel',
-				'options' => $this->getValidDestinationWikis(),
+				'default' => array_key_first( $wikis ),
+				'options' => $wikis,
 			],
 			'namespace' => [
 				'type' => 'namespaceselect',
@@ -149,12 +162,21 @@ class SpecialTransferPages extends SpecialPage {
 
 	}
 
+	// HTMLForm used the way it's done here appears to require a setSubmitCallback
+	// function, but it seems cleaner to just let execute() route everything. Use
+	// dummy() to do a pointless callback.
 	public function dummy () {}
 
 	public function queryTransferablePages() {
 		$output = $this->getOutput();
 
-		$output->setPageTitle( 'Transfer pages' );  // FIXME i18n
+		$output->addHTML(
+			Xml::element(
+				'h2',
+				[],
+				$this->msg( 'ext-meza-transferpages-transferrable-pages' )->parse()
+			)
+		);
 
 		$query = $this->buildTransferablePagesQuery();
 
@@ -166,23 +188,11 @@ class SpecialTransferPages extends SpecialPage {
 		$formid = 'ext-meza-transferpages-form2';
 		$action = $this->getPageTitle()->getLocalURL();
 
-		$numRows = 0;
-		#
-		#
-		# FIXME i18n
-		#
-		#
-		$html = "<br />
-			<form id='$formid' action='$action' method='post' enctype='application/x-www-form-urlencoded'>
-			<input type='hidden' name='destinationwiki' value='$destWiki' />
-			<table class='sortable wikitable jquery-tablesorter' style='width:100%;'>
-			<tr>
-				<th>Page</th>
-				<th>Transfer risk</th>
-				<th>Do transfer</th>
-				<th>Action on source wiki</th>
-			</tr>";
+		$pagesConflict = [];
+		$pagesIdentical = [];
+		$pagesSourceOnly = [];
 
+		$numRows = 0;
 		while( $row = $dbr->fetchRow( $res ) ) {
 
 			list($ns, $titleText, $srcId, $wikis, $numContentUniques, $numNameDupes) = [
@@ -250,16 +260,58 @@ class SpecialTransferPages extends SpecialPage {
 				. ' ' .  $this->queryTableRadio( 'srcaction', 'donothingsrc', $srcId, true );
 
 			// removed: <input type='hidden' name='transferids[]' value='$srcId' />
-			$html .= "<tr>
+			$rowHtml = "<tr>
 					<td>$links</td>
 					$transferRiskTd
 					<td>$transferPage</td>
 					<td>$srcAction</td>
 				</tr>";
 
+			if ( $transferRisk === 'danger' ) {
+				$pagesConflict[] = $rowHtml;
+			} elseif ( $transferRisk === 'okay' ) {
+				$pagesIdentical[] = $rowHtml;
+			} else {
+				$pagesSourceOnly[] = $rowHtml;
+			}
+
 			$numRows++;
 		}
-		$html .= "</table>";
+
+		$tableStart = "<table class='sortable wikitable jquery-tablesorter' style='width:100%;'>
+			<tr>
+				<th>Page</th>
+				<th>Transfer risk</th>
+				<th>Do transfer</th>
+				<th>Action on source wiki</th>
+			</tr>";
+
+		#
+		#
+		# FIXME i18n
+		#
+		#
+		$html = "<br />
+			<form id='$formid' action='$action' method='post' enctype='application/x-www-form-urlencoded'>
+			<input type='hidden' name='destinationwiki' value='$destWiki' />";
+
+
+		$pageTables = [
+			'conflicting' => $pagesConflict,
+			'identical' => $pagesIdentical,
+			'unique' => $pagesSourceOnly
+		];
+		foreach ( $pageTables as $msgPart => $pages ) {
+			$html .= Xml::element(
+					'h3',
+					[],
+					$this->msg( 'ext-meza-transferpages-' . $msgPart . '-header' )
+						->params( )
+						->parse( count( $pagesConflict ) )
+				);
+			$html .= $tableStart . implode( '', $pages ) . '</table>';
+		}
+
 		$html .= '<button
 			type="submit"
 			tabindex="0"
@@ -269,7 +321,7 @@ class SpecialTransferPages extends SpecialPage {
 			>Do transfer</button>';
 		$html .= "</form>";
 
-		$output->prependHTML( $html );
+		$output->addHTML( $html );
 	}
 
 	public function queryTableCheckbox( $type, $num ) {
@@ -435,7 +487,7 @@ class SpecialTransferPages extends SpecialPage {
 			$output .= '<li>';
 			$output .= $this->msg( 'ext-meza-transferpages-transferring-' . $srcAction )
 					->params( $title->getFullText(), $destWiki )
-					->parse() .
+					->parse();
 			$output .= '</li>';
 
 			// prep the jobs

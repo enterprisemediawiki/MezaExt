@@ -12,6 +12,10 @@ class MezaTransferPageJob extends Job {
 
 	public function run() {
 
+		$unique = uniqid( '', true ); // unique enough
+		$this->pageListForDump .= '-' . $unique;
+		$this->pageDumpOutputXML .= '-' . $unique;
+
 		$page = $this->title->getFullText();
 		$srcWiki = $this->params['src'];
 		$destWiki = $this->params['dest'];
@@ -28,8 +32,15 @@ class MezaTransferPageJob extends Job {
 		// create file listing which page to dump
 		file_put_contents( $this->pageListForDump, $page );
 
+		// FIXME echo is probably not the preferred way to do this but I want to
+		// make sure any issues encountered get reported. Hopefully they'd show
+		// in error logs but this is extra precaution since these actions are
+		// highly obscured from view: user action creates a job, job runs
+		// sometime later, job calls shell_exec. Seems like a recipe for missing
+		// something important.
+
 		// dumpBackup.php
-		shell_exec(
+		echo shell_exec(
 			"WIKI=$srcWiki php " .
 			"{$this->maintDir}dumpBackup.php " .
 			"--full " .
@@ -41,7 +52,7 @@ class MezaTransferPageJob extends Job {
 		);
 
 		// importDump.php
-		shell_exec(
+		echo shell_exec(
 			"WIKI=$destWiki php " .
 			"{$this->maintDir}importDump.php " .
 			"--no-updates " .
@@ -59,6 +70,10 @@ class MezaTransferPageJob extends Job {
 			// $this->redirectSourceToDest( $title, $srcWiki, $destWiki );
 		}
 		// else do nothing
+
+		// cleanup files
+		unlink( $this->pageListForDump );
+		unlink( $this->pageDumpOutputXML );
 
 		return true;
 	}
