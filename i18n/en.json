@@ -1,5 +1,28 @@
 {
 	"meza-ext-desc": "Extension to capture all the little things meza (https://github.com/enterprisemediawiki/meza) wants",
+
+	"ext-meza-transferpages-dest-link": "(on $1)",
+	"ext-meza-transferpages-risk-danger": "Page conflicts!",
+	"ext-meza-transferpages-risk-okay": "Pages identical",
+	"ext-meza-transferpages-risk-good": "Page on source only",
+
+	"ext-meza-transferpages-setupheader": "Select destination and filter pages",
+	"ext-meza-transferpages-transferrable-pages": "Select pages for transfer",
+
+	"ext-meza-transferpages-conflicting-header": "($1) pages conflicting on source and destination",
+	"ext-meza-transferpages-identical-header": "($1) pages identical on source and destination",
+	"ext-meza-transferpages-unique-header": "($1) pages only on source - good to transfer to destination",
+
+	"ext-meza-transferpages-transferring-summary": "The following jobs were added to the job queue to transfer pages from this wiki to $1. Depending on the state of your job queue this may take a while.",
+	"ext-meza-transferpages-transferring-deletesrc": "Transferring [[$1]] to '[[$2:$1|$2]]'. Deleting page from this wiki.",
+	"ext-meza-transferpages-transferring-redirectsrc": "Transferring [[$1]] to '[[$2:$1|$2]]'. Redirecting this wiki's page there.",
+	"ext-meza-transferpages-transferring-donothingsrc": "Transferring [[$1]] to '[[$2:$1|$2]]'. Leaving this wiki unchanged.",
+
+	"ext-meza-destinationwiki-selectlabel": "Transfer pages to wiki",
+	"ext-meza-namespace-selectlabel": "Select pages from namespace",
+	"ext-meza-category-textboxlabel": "Select pages from category",
+	"ext-meza-transferpages-setup-submit": "Get transferable pages",
+
 	"serverstatus-mode-httpdstatus": "Apache server status",
 	"serverstatus-mode-httpdinfo": "Apache server info",
 	"serverstatus-mode-phpinfo": "PHP info",

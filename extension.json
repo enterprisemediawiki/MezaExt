@@ -8,6 +8,7 @@
 	"descriptionmsg": "meza-ext-desc",
 	"type": "other",
 	"SpecialPages": {
+		"TransferPages": "SpecialTransferPages",
 		"Serverstatus": "SpecialServerStatus"
 	},
 	"MessagesDirs": {
@@ -16,19 +17,28 @@
 		]
 	},
 	"AutoloadClasses": {
-		"SpecialServerStatus": "SpecialServerStatus.php"
+		"MezaTransferPageJob": "includes/MezaTransferPageJob.php",
+		"SpecialTransferPages": "includes/SpecialTransferPages.php",
+		"SpecialServerStatus": "includes/SpecialServerStatus.php"
+	},
+	"JobClasses": {
+		"mezaTransferPage": "MezaTransferPageJob"
 	},
 	"AvailableRights": [
+		"transferpages",
 		"viewserverstatus"
 	],
 	"GroupPermissions": {
 		"sysop": {
+			"transferpages": true,
 			"viewserverstatus": true
 		},
 		"user": {
+			"transferpages": false,
 			"viewserverstatus": false
 		},
 		"*": {
+			"transferpages": false,
 			"viewserverstatus": false
 		}
 	},
