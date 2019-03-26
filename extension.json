@@ -42,5 +42,15 @@
 			"viewserverstatus": false
 		}
 	},
+	"ResourceModules": {
+		"ext.mezaext.specialtransferpages": {
+			"styles": "specialtransferpages/transferpages.css",
+			"scripts": "specialtransferpages/transferpages.js"
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "modules",
+		"remoteExtPath": "MezaExt/modules"
+	},
 	"manifest_version": 1
 }

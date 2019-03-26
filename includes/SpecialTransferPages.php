@@ -62,11 +62,7 @@ class SpecialTransferPages extends SpecialPage {
 
 		$this->getOutput()->setPageTitle( 'Transfer pages' );  // FIXME i18n
 
-		# from cross wiki diff
-		// $this->getOutput()->addModules( 'ext.nasaspecifics.crosswikidiff' );
-		// $this->duplicatedPages();
-		# END example
-
+		$this->getOutput()->addModules( 'ext.mezaext.specialtransferpages' );
 
 		// Only allow users with 'transferpages' right (sysop by default) to access
 		$user = $this->getUser();
@@ -218,12 +214,15 @@ class SpecialTransferPages extends SpecialPage {
 
 			if ( $conflictWithDest ) {
 				$transferRisk = 'danger';
+				$pageTable = 'conflicting';
 			}
 			elseif ( $isOnDest ) {
 				$transferRisk = 'okay';
+				$pageTable = 'identical';
 			}
 			else {
 				$transferRisk = 'good';
+				$pageTable = 'unique';
 			}
 
 			$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
@@ -253,11 +252,11 @@ class SpecialTransferPages extends SpecialPage {
 
 			// $diff = 'at some point create a good diff view between the pages on each wiki';
 
-			$transferPage = $this->queryTableCheckbox( 'dotransfer', $srcId );
+			$transferPage = $this->queryTableCheckbox( 'dotransfer', $srcId, $pageTable );
 
-			$srcAction = $this->queryTableRadio( 'srcaction', 'deletesrc', $srcId )
-				. ' ' .  $this->queryTableRadio( 'srcaction', 'redirectsrc', $srcId )
-				. ' ' .  $this->queryTableRadio( 'srcaction', 'donothingsrc', $srcId, true );
+			$srcAction = $this->queryTableRadio( 'srcaction', 'deletesrc', $srcId, $pageTable )
+				. ' ' .  $this->queryTableRadio( 'srcaction', 'redirectsrc', $srcId, $pageTable )
+				. ' ' .  $this->queryTableRadio( 'srcaction', 'donothingsrc', $srcId, $pageTable, true );
 
 			// removed: <input type='hidden' name='transferids[]' value='$srcId' />
 			// removed: $transferRiskTd (FIXME: remove logic generating this)
@@ -278,14 +277,6 @@ class SpecialTransferPages extends SpecialPage {
 			$numRows++;
 		}
 
-		// removed: <th>Transfer risk</th>
-		$tableStart = "<table class='sortable wikitable jquery-tablesorter' style='width:100%;'>
-			<tr>
-				<th>Page</th>
-				<th>Do transfer</th>
-				<th>Action on source wiki</th>
-			</tr>";
-
 		#
 		#
 		# FIXME i18n
@@ -301,6 +292,8 @@ class SpecialTransferPages extends SpecialPage {
 			'unique' => $pagesSourceOnly
 		];
 		foreach ( $pageTables as $msgPart => $pages ) {
+			$tableStart = $this->getTableStart( $msgPart );
+
 			$collapse = $msgPart === 'unique' ? '' : ' mw-collapsed';
 
 			$html .= Xml::element(
@@ -312,8 +305,11 @@ class SpecialTransferPages extends SpecialPage {
 				);
 			$html .= '<div class="mw-collapsible' . $collapse . '">';
 			// $html .= '<span class="mw-collapsible-toggle" style="float:none;">Expand</span>';
-			$html .= '<div class="mw-collapsible-content">' .
-				$tableStart . implode( '', $pages ) . '</table>'
+			$html .=
+				'<div class="mw-collapsible-content">'
+					. '<div class="ext-meza-transferpages-overflow">'
+						. $tableStart . implode( '', $pages ) . '</table>'
+					. '</div>'
 				. '</div>';
 			$html .= '</div>';
 		}
@@ -330,23 +326,59 @@ class SpecialTransferPages extends SpecialPage {
 		$output->addHTML( $html );
 	}
 
-	public function queryTableCheckbox( $type, $num ) {
+	public function getTableStart( $msgPart ) {
+		// removed: <th>Transfer risk</th>
+		return "<table class='sortable wikitable jquery-tablesorter' style='width:100%;'>
+			<tr>
+				<th>Page</th>
+				<th>
+					Do transfer
+					<br />
+					<a href='#' id='dotransfer-$msgPart-check-all'>check all</a>
+					 |
+					<a href='#' id='dotransfer-$msgPart-uncheck-all'>uncheck all</a>
+				</th>
+				<th>
+					Action on source wiki
+					<br />
+					<a href='#' id='srcaction-donothingsrc-$msgPart-check-all'>do nothing all</a>
+					 |
+					<a href='#' id='srcaction-deletesrc-$msgPart-check-all'>delete all</a>
+					 |
+					<a href='#' id='srcaction-redirectsrc-$msgPart-check-all'>redirect all</a>
+				</th>
+			</tr>";
+	}
+
+	public function queryTableCheckbox( $type, $num, $table ) {
 		$textMsgs = [
-			'dotransfer' => 'transfer page',
+			'dotransfer-danger' => 'transfer page (danger!)',
+			'dotransfer-okay' => 'transfer page (no change)',
+			'dotransfer-good' => 'transfer page',
 		];
-		$text = $textMsgs[$type];
+		$text = $textMsgs["$type-$table"];
 
 		$name = $type . '[' . $num . ']';
-		return "<input type='checkbox' name='$name' id='$type$num' class='$type' value='1'>
+		return "<input type='checkbox' name='$name' id='$type$num' class='$type $type-$table' value='1'>
 			<label for='$type$num'>$text</label>";
 	}
 
-	public function queryTableRadio( $groupname, $value, $num, $checked=false ) {
+	public function queryTableRadio( $groupname, $value, $num, $pageTable, $checked=false ) {
+
 		$textMsgs = [
-			'deletesrc' => 'delete',
-			'redirectsrc' => 'redirect',
 			'donothingsrc' => 'do nothing',
 		];
+
+		// don't allow destructive actions when pages conflict
+		if ( $pageTable !== 'conflicting' ) {
+			$textMsgs['deletesrc'] => 'delete';
+			$textMsgs['redirectsrc'] => 'redirect';
+		}
+
+		if ( ! in_array( $value, $textMsgs ) ) {
+			return '';
+		}
+
 		$text = $textMsgs[$value];
 
 		if ( $checked ) {
@@ -358,7 +390,7 @@ class SpecialTransferPages extends SpecialPage {
 
 		$name = $groupname . '[' . $num . ']';
 
-		return "<input type='radio' name='$name' id='$groupname-$value-$num' class='$groupname $groupname-$value $groupname-$num' value='$value' $checked>
+		return "<input type='radio' name='$name' id='$groupname-$value-$num' class='$groupname $groupname-$value $groupname-$value-$pageTable $groupname-$num' value='$value' $checked>
 			<label for='$groupname-$value-$num'>$text</label>";
 	}
 
