@@ -352,9 +352,9 @@ class SpecialTransferPages extends SpecialPage {
 
 	public function queryTableCheckbox( $type, $num, $table ) {
 		$textMsgs = [
-			'dotransfer-danger' => 'transfer page (danger!)',
-			'dotransfer-okay' => 'transfer page (no change)',
-			'dotransfer-good' => 'transfer page',
+			'dotransfer-conflicting' => 'transfer page (danger!)',
+			'dotransfer-identical' => 'transfer page (no change)',
+			'dotransfer-unique' => 'transfer page',
 		];
 		$text = $textMsgs["$type-$table"];
 
@@ -371,8 +371,8 @@ class SpecialTransferPages extends SpecialPage {
 
 		// don't allow destructive actions when pages conflict
 		if ( $pageTable !== 'conflicting' ) {
-			$textMsgs['deletesrc'] => 'delete';
-			$textMsgs['redirectsrc'] => 'redirect';
+			$textMsgs['deletesrc'] = 'delete';
+			$textMsgs['redirectsrc'] = 'redirect';
 		}
 
 		if ( ! in_array( $value, $textMsgs ) ) {
