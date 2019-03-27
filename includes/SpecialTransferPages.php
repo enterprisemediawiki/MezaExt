@@ -375,7 +375,7 @@ class SpecialTransferPages extends SpecialPage {
 			$textMsgs['redirectsrc'] = 'redirect';
 		}
 
-		if ( ! in_array( $value, $textMsgs ) ) {
+		if ( ! isset( $textMsgs[$value] ) ) {
 			return '';
 		}
 

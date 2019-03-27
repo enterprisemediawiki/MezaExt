@@ -8,7 +8,7 @@
 		return function ( event ) {
 			event.preventDefault();
 			$( selector ).prop( "checked", checked );
-		}
+		};
 	};
 
 	for( var i = 0; i < actions.length; i++ ) {
@@ -35,7 +35,7 @@
 					".srcaction-" + radiotype + '-' + table,
 					true
 				)
-			});
+			);
 		}
 	}
 
