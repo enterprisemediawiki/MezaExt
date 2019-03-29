@@ -33,6 +33,16 @@ matrix:
       script:
         - composer test-php-lint
 
+    - language: php
+      php: "7.3"
+      before_script:
+        - whoami
+        - pwd
+        - cat /etc/os-release
+        - composer install  --no-interaction --no-progress
+      script:
+        - composer test-php-lint
+
     - language: node_js
       node_js: "lts/*"
       before_script:
