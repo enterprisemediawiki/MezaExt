@@ -188,6 +188,8 @@ class SpecialTransferPages extends SpecialPage {
 		$pagesIdentical = [];
 		$pagesSourceOnly = [];
 
+		$totalPagesQueried = $dbr->numRows();
+
 		$numRows = 0;
 		while( $row = $dbr->fetchRow( $res ) ) {
 
@@ -199,10 +201,6 @@ class SpecialTransferPages extends SpecialPage {
 				$row['num_content_uniques'],
 				$row['num_name_dupes']
 			];
-
-			// todo: add logic here to check for change in $isOnDest and
-			// $conflictWithDest, to break the table into three tables. Then can
-			// easily perform actions just against the separate types.
 
 			$isOnDest = $numNameDupes > 1 ? true : false;
 			if ( $isOnDest ) {
@@ -292,26 +290,30 @@ class SpecialTransferPages extends SpecialPage {
 			'unique' => $pagesSourceOnly
 		];
 		foreach ( $pageTables as $msgPart => $pages ) {
-			$tableStart = $this->getTableStart( $msgPart );
-
-			$collapse = $msgPart === 'unique' ? '' : ' mw-collapsed';
 
 			$html .= Xml::element(
-					'h3',
-					[],
-					$this->msg( 'ext-meza-transferpages-' . $msgPart . '-header' )
-						->params( count( $pages ) )
-						->parse()
+				'h3',
+				[],
+				$this->msg( 'ext-meza-transferpages-' . $msgPart . '-header' )
+					->params( count( $pages ) )
+					->parse()
+			);
+
+			$table = $this->getPageTable( $msgPart, $pages );
+
+			if ( $totalPagesQueried <= $egMezaExtTransferPagesMaxPages ) {
+				$html .= $this->getAllPagesButtons( $msgPart, true );
+				$html .= $table;
+			} else {
+				$html .= $this->getAllPagesButtons( $msgPart, false );
+				$html .= Xml::element(
+					'p', [],
+					$this->msg( 'ext-meza-transferpages-hide-many-pages' )
+						->params( $totalPagesQueried, $egMezaExtTransferPagesMaxPages )->text()
 				);
-			$html .= '<div class="mw-collapsible' . $collapse . '">';
-			// $html .= '<span class="mw-collapsible-toggle" style="float:none;">Expand</span>';
-			$html .=
-				'<div class="mw-collapsible-content">'
-					. '<div class="ext-meza-transferpages-overflow">'
-						. $tableStart . implode( '', $pages ) . '</table>'
-					. '</div>'
-				. '</div>';
-			$html .= '</div>';
+				$html .= '<div style="display:none;">' . $table . '</div>';
+			}
+
 		}
 
 		$html .= '<button
@@ -326,6 +328,113 @@ class SpecialTransferPages extends SpecialPage {
 		$output->addHTML( $html );
 	}
 
+	public function getPageTable( $msgPart, $pages ) {
+		$tableStart = $this->getTableStart( $msgPart );
+		$collapse = $msgPart === 'unique' ? '' : ' mw-collapsed';
+
+		$html .= '<div class="mw-collapsible' . $collapse . '">';
+		// $html .= '<span class="mw-collapsible-toggle" style="float:none;">Expand</span>';
+		$html .=
+			'<div class="mw-collapsible-content">'
+				. '<div class="ext-meza-transferpages-overflow">'
+					. $tableStart . implode( '', $pages ) . '</table>'
+				. '</div>'
+			. '</div>';
+		$html .= '</div>';
+		return $html;
+	}
+
+	public function getAllPagesButtons( $msgPart, $linksNotRadios = true ) {
+
+		// at some point add to "identical" only:
+		//    don't transfer but still perform source actions
+
+		if ( $linksNotRadios ) {
+			$glue = ' | ';
+			$type = 'link';
+		} else {
+			$glue = '<br />';
+			$type = 'radio';
+		}
+
+		$doTransferButtons = [
+			$this->checkAllButton( 'dotransfer', '', $msgPart, true, $type ),
+			$this->checkAllButton( 'dotransfer', '', $msgPart, false, $type ),
+		];
+
+		$srcActionButtons = [
+			$this->checkAllButton( 'srcaction', 'donothingsrc', $msgPart, true, $type ),
+			$this->checkAllButton( 'srcaction', 'deletesrc', $msgPart, true, $type ),
+			$this->checkAllButton( 'srcaction', 'redirectsrc', $msgPart, true, $type ),
+		];
+
+		$output = $this->msg( 'ext-meza-transferpages-dotransfer-all-' . $msgPart )->text()
+			. '<br />'
+			. implode( $glue, $doTransferButtons )
+			. '<br />'
+			. $this->msg( 'ext-meza-transferpages-srcaction-all-' . $msgPart )->text()
+			. '<br />'
+			. implode( $glue, $srcActionButtons );
+
+		return $output;
+	}
+
+	/**
+	 * $id =
+	 * 		dotransfer-conflicting-check-all
+	 * 		dotransfer-identical-check-all
+	 * 		dotransfer-unique-check-all
+	 *
+	 * 		dotransfer-conflicting-uncheck-all
+	 * 		dotransfer-identical-uncheck-all
+	 * 		dotransfer-unique-uncheck-all
+	 *
+	 * 		srcaction-donothingsrc-conflicting-check-all
+	 * 		srcaction-donothingsrc-identical-check-all
+	 * 		srcaction-donothingsrc-unique-check-all
+	 *
+	 * 		srcaction-deletesrc-conflicting-check-all
+	 * 		srcaction-deletesrc-identical-check-all
+	 * 		srcaction-deletesrc-unique-check-all
+	 *
+	 * 		srcaction-redirectsrc-conflicting-check-all
+	 * 		srcaction-redirectsrc-identical-check-all
+	 * 		srcaction-redirectsrc-unique-check-all
+	 */
+	public function checkAllButton( $action, $subaction, $contentCompareType, $check=true, $type='link' ) {
+
+		if ( $subaction ) {
+			$prefix = "$action-$subaction";
+		} else {
+			$prefix = $action;
+		}
+
+		if ( $check ) {
+			$check = 'check';
+		} else {
+			$check = 'uncheck';
+		}
+
+		// examples:
+		// dotransfer-unique-check-all or srcaction-deletesrc-identical-check-all
+		$id = "$prefix-$contentCompareType-$check-all";
+
+		// examples:
+		// dotransfer-unique-all or srcaction-identical-all
+		// note no "deletesrc" in second example and no check/uncheck from either
+		$class = "$action-$contentCompareType-all";
+
+		$label = $this->msg( $id )->text();
+		if ( $type === 'radio' ) {
+			$button = "<input type='radio' name='$id' id='$id' class='$class' value='1'>"
+				. "<label for='$id'>$label</label>";
+		} else {
+			$button = "<a href='#' id='$id'>$label</a>";
+		}
+
+		return $button;
+	}
+
 	public function getTableStart( $msgPart ) {
 		// removed: <th>Transfer risk</th>
 		return "<table class='sortable wikitable jquery-tablesorter' style='width:100%;'>
@@ -333,19 +442,9 @@ class SpecialTransferPages extends SpecialPage {
 				<th>Page</th>
 				<th>
 					Do transfer
-					<br />
-					<a href='#' id='dotransfer-$msgPart-check-all'>check all</a>
-					 |
-					<a href='#' id='dotransfer-$msgPart-uncheck-all'>uncheck all</a>
 				</th>
 				<th>
 					Action on source wiki
-					<br />
-					<a href='#' id='srcaction-donothingsrc-$msgPart-check-all'>do nothing all</a>
-					 |
-					<a href='#' id='srcaction-deletesrc-$msgPart-check-all'>delete all</a>
-					 |
-					<a href='#' id='srcaction-redirectsrc-$msgPart-check-all'>redirect all</a>
 				</th>
 			</tr>";
 	}

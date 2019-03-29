@@ -1,0 +1,50 @@
+language: php
+php:
+  - "7.2"
+  - "7.1"
+  - "7.0"
+
+matrix:
+  include:
+    - language: php
+      php: "7.0"
+      before_script:
+        - whoami
+        - pwd
+        - cat /etc/os-release
+        - composer install  --no-interaction --no-progress
+      script:
+        - composer test-php-lint
+        - composer test-minus-x
+
+    - language: php
+      php: "7.1"
+      before_script:
+        - whoami
+        - pwd
+        - cat /etc/os-release
+        - composer install  --no-interaction --no-progress
+      script:
+        - composer test-php-lint
+        - composer test-phpcs
+
+    - language: php
+      php: "7.2"
+      before_script:
+        - whoami
+        - pwd
+        - cat /etc/os-release
+        - composer install  --no-interaction --no-progress
+      script:
+        - composer test-php-lint
+
+    - language: node_js
+      node_js: "lts"
+      before_script:
+        - whoami
+        - pwd
+        - cat /etc/os-release
+        - npm install -g eslint eslint-plugin-no-jquery eslint-config-wikimedia
+      script:
+        - eslint resources/ --color
+

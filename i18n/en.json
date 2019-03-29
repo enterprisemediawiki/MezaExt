@@ -23,6 +23,15 @@
 	"ext-meza-category-textboxlabel": "Select pages from category",
 	"ext-meza-transferpages-setup-submit": "Get transferable pages",
 
+	"ext-meza-transferpages-dotransfer-all-conflicting": "For conflicting pages:",
+	"ext-meza-transferpages-dotransfer-all-identical": "For identical pages:",
+	"ext-meza-transferpages-dotransfer-all-unique": "For unique pages:",
+	"ext-meza-transferpages-srcaction-all-conflicting": "For conflicting pages on the source wiki:",
+	"ext-meza-transferpages-srcaction-all-identical": "For identical pages on the source wiki:",
+	"ext-meza-transferpages-srcaction-all-unique": "For unique pages on the source wiki:",
+
+	"ext-meza-transferpages-hide-many-pages": "$1 total pages found. Individual pages hidden when greater than $2 pages.",
+
 	"serverstatus-mode-httpdstatus": "Apache server status",
 	"serverstatus-mode-httpdinfo": "Apache server info",
 	"serverstatus-mode-phpinfo": "PHP info",

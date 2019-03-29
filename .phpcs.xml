@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<ruleset name="MediaWiki">
+	<file>.</file>
+	<rule ref="./vendor/mediawiki/mediawiki-codesniffer/MediaWiki">
+
+		<!-- These exclusions taken from Extension:Echo and should be re-assessed -->
+		<exclude name="MediaWiki.Commenting.FunctionComment.MissingDocumentationPublic" />
+		<exclude name="MediaWiki.WhiteSpace.SpaceBeforeSingleLineComment.NewLineComment" />
+
+		<!-- Allow non-wg prefix (e.g. $egWatchAnalyticsPageCounter) -->
+		<exclude name="MediaWiki.NamingConventions.ValidGlobalName.allowedPrefix" />
+		<!-- Same as above, but for PHP 5.6 (using MW CodeSniffer 19.1.0) -->
+		<exclude name="MediaWiki.NamingConventions.ValidGlobalName.wgPrefix" />
+
+		<!-- Allow type-hinting for scalars (e.g. int $myInt, string $myString) -->
+		<exclude name="MediaWiki.PHP70Features.ScalarTypeHintUsage.Found" />
+		<exclude name="MediaWiki.PHP70Features.ScalarTypeHintUsage.ReturnTypeFound" />
+
+		<!-- Unfortunately this extension needs to use shell_exec (maybe) -->
+		<exclude name="MediaWiki.Usage.ForbiddenFunctions.shell_exec" />
+	</rule>
+	<rule ref="Generic.Files.LineLength">
+		<properties>
+			<property name="lineLimit" value="140" />
+		</properties>
+	</rule>
+	<arg name="encoding" value="UTF-8" />
+	<arg name="extensions" value="php,php5,inc" />
+	<arg name="colors" />
+</ruleset>

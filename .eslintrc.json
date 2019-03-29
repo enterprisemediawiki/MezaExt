@@ -1,0 +1,26 @@
+{
+	"root": true,
+	"extends": [
+		"wikimedia/client",
+		"wikimedia/jquery"
+	],
+	"globals": {
+		"mw": true
+	},
+	"rules": {
+		"no-jquery/no-extend": "error",
+		"no-jquery/no-hide": "error",
+		"no-jquery/no-show": "error",
+		"no-jquery/no-toggle": "error",
+		"max-statements-per-line": [ "error", { "max": 1 } ],
+		"max-len": "off",
+		"no-jquery/no-global-selector": "off",
+		"no-jquery/no-parse-html-literal": "off",
+		"no-jquery/no-animate-toggle": "off",
+		"no-jquery/no-toggle": "off",
+		"no-jquery/no-event-shorthand": "off"
+
+		// Uncomment this if testing on Windows
+		// ,"linebreak-style": "off"
+	}
+}
