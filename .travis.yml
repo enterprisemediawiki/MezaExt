@@ -41,5 +41,5 @@ matrix:
         - cat /etc/os-release
         - npm install -g eslint eslint-plugin-no-jquery eslint-config-wikimedia
       script:
-        - eslint resources/ --color
+        - eslint . --color
 
