@@ -14,7 +14,7 @@
 			"phpcs -p -s",
 			"minus-x check ."
 		],
-		"test-parallel-lint": [
+		"test-php-lint": [
 			"parallel-lint . --exclude vendor --exclude node_modules"
 		],
 		"test-phpcs": [
