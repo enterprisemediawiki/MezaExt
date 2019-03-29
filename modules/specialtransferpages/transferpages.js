@@ -1,12 +1,12 @@
 ( function () {
 
-	var actions = [ "check", "uncheck" ],
+	var actions = [ 'check', 'uncheck' ],
 		radiotypes = [ 'deletesrc', 'redirectsrc', 'donothingsrc' ],
 		tables = [ 'conflicting', 'identical', 'unique' ],
 		clickerFactory = function ( selector, checked ) {
 			return function ( event ) {
 				event.preventDefault();
-				$( selector ).prop( "checked", checked );
+				$( selector ).prop( 'checked', checked );
 			};
 		},
 		i,
@@ -17,11 +17,11 @@
 
 	for ( i = 0; i < actions.length; i++ ) {
 		for ( j = 0; j < tables.length; j++ ) {
-			actionBool = action === "check" ? true : false;
+			actionBool = action === 'check';
 
-			$( "#dotransfer-" + tables[j] + "-" + actions[i] + "-all" ).click(
+			$( '#dotransfer-' + tables[ j ] + '-' + actions[ i ] + '-all' ).click(
 				clickerFactory(
-					".dotransfer-" + tables[j],
+					'.dotransfer-' + tables[ j ],
 					actionBool
 				)
 			);
@@ -30,9 +30,9 @@
 
 	for ( i = 0; i < radiotypes.length; i++ ) {
 		for ( j = 0; j < tables.length; j++ ) {
-			$( "#srcaction-" + radiotypes[i] + "-" + tables[j] + "-check-all" ).click(
+			$( '#srcaction-' + radiotypes[ i ] + '-' + tables[ j ] + '-check-all' ).click(
 				clickerFactory(
-					".srcaction-" + radiotypes[i] + '-' + tables[j],
+					'.srcaction-' + radiotypes[ i ] + '-' + tables[ j ],
 					true
 				)
 			);
