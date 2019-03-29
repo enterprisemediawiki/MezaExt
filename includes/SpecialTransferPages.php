@@ -492,7 +492,7 @@ class SpecialTransferPages extends SpecialPage {
 
 		$name = $groupname . '[' . $num . ']';
 
-		return "<input type='radio' name='$name' id='$groupname-$value-$num' class='$groupname $groupname-$value $groupname-$value-$pageTable $groupname-$num' value='$value' $checked>
+		return "<input type='radio' name='$name' id='$groupname-$value-$num' class='$groupname $groupname-$value $groupname-$pageTable $groupname-$value-$pageTable $groupname-$num' value='$value' $checked>
 			<label for='$groupname-$value-$num'>$text</label>";
 	}
 
