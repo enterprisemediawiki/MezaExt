@@ -164,6 +164,8 @@ class SpecialTransferPages extends SpecialPage {
 	public function dummy () {}
 
 	public function queryTransferablePages() {
+		global $egMezaExtTransferPagesMaxPages;
+
 		$output = $this->getOutput();
 
 		$output->addHTML(
@@ -188,7 +190,7 @@ class SpecialTransferPages extends SpecialPage {
 		$pagesIdentical = [];
 		$pagesSourceOnly = [];
 
-		$totalPagesQueried = $dbr->numRows();
+		$totalPagesQueried = $res->numRows();
 
 		$numRows = 0;
 		while( $row = $dbr->fetchRow( $res ) ) {
@@ -332,7 +334,7 @@ class SpecialTransferPages extends SpecialPage {
 		$tableStart = $this->getTableStart( $msgPart );
 		$collapse = $msgPart === 'unique' ? '' : ' mw-collapsed';
 
-		$html .= '<div class="mw-collapsible' . $collapse . '">';
+		$html = '<div class="mw-collapsible' . $collapse . '">';
 		// $html .= '<span class="mw-collapsible-toggle" style="float:none;">Expand</span>';
 		$html .=
 			'<div class="mw-collapsible-content">'
@@ -418,6 +420,7 @@ class SpecialTransferPages extends SpecialPage {
 		// examples:
 		// dotransfer-unique-check-all or srcaction-deletesrc-identical-check-all
 		$id = "$prefix-$contentCompareType-$check-all";
+		$name = "$action-$contentCompareType-all";
 
 		// examples:
 		// dotransfer-unique-all or srcaction-identical-all

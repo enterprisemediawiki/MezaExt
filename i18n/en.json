@@ -32,6 +32,27 @@
 
 	"ext-meza-transferpages-hide-many-pages": "$1 total pages found. Individual pages hidden when greater than $2 pages.",
 
+	"dotransfer-conflicting-check-all": "",
+	"dotransfer-conflicting-uncheck-all": "",
+
+	"srcaction-donothingsrc-conflicting-check-all": "",
+	"srcaction-deletesrc-conflicting-check-all": "",
+	"srcaction-redirectsrc-conflicting-check-all": "",
+
+	"dotransfer-identical-check-all": "",
+	"dotransfer-identical-uncheck-all": "",
+
+	"srcaction-donothingsrc-identical-check-all": "",
+	"srcaction-deletesrc-identical-check-all": "",
+	"srcaction-redirectsrc-identical-check-all": "",
+
+	"dotransfer-unique-check-all": "",
+	"dotransfer-unique-uncheck-all": "",
+
+	"srcaction-donothingsrc-unique-check-all": "",
+	"srcaction-deletesrc-unique-check-all": "",
+	"srcaction-redirectsrc-unique-check-all": "",
+
 	"serverstatus-mode-httpdstatus": "Apache server status",
 	"serverstatus-mode-httpdinfo": "Apache server info",
 	"serverstatus-mode-phpinfo": "PHP info",

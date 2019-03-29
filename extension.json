@@ -52,5 +52,9 @@
 		"localBasePath": "modules",
 		"remoteExtPath": "MezaExt/modules"
 	},
+	"config": {
+		"_prefix": "eg",
+		"MezaExtTransferPagesMaxPages": 500
+	},
 	"manifest_version": 1
 }
