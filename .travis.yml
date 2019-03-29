@@ -33,7 +33,7 @@ matrix:
         - composer test-php-lint
 
     - language: node_js
-      node_js: "lts"
+      node_js: "lts/*"
       before_script:
         - whoami
         - pwd
