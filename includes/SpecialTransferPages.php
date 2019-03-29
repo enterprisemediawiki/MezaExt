@@ -254,9 +254,9 @@ class SpecialTransferPages extends SpecialPage {
 
 			$transferPage = $this->queryTableCheckbox( 'dotransfer', $srcId, $pageTable );
 
-			$srcAction = $this->queryTableRadio( 'srcaction', 'deletesrc', $srcId, $pageTable )
-				. ' ' .  $this->queryTableRadio( 'srcaction', 'redirectsrc', $srcId, $pageTable )
-				. ' ' .  $this->queryTableRadio( 'srcaction', 'donothingsrc', $srcId, $pageTable, true );
+			$srcAction = $this->queryTableRadio( 'srcaction', 'donothingsrc', $srcId, $pageTable, true )
+				. ' ' .  $this->queryTableRadio( 'srcaction', 'deletesrc', $srcId, $pageTable )
+				. ' ' .  $this->queryTableRadio( 'srcaction', 'redirectsrc', $srcId, $pageTable );
 
 			// removed: <input type='hidden' name='transferids[]' value='$srcId' />
 			// removed: $transferRiskTd (FIXME: remove logic generating this)
@@ -303,8 +303,8 @@ class SpecialTransferPages extends SpecialPage {
 
 			$table = $this->getPageTable( $msgPart, $pages );
 
-			if ( $egMezaExtTransferPagesMaxPages !== 0 && $totalPagesQueried > $egMezaExtTransferPagesMaxPages ) {
-				$html .= $this->getAllPagesButtons( $msgPart, true );
+			if ( $egMezaExtTransferPagesMaxPages === 0 || $totalPagesQueried <= $egMezaExtTransferPagesMaxPages ) {
+				$html .= $this->getAllPagesButtons( $msgPart, false );
 				$html .= $table;
 			} else {
 				$html .= $this->getAllPagesButtons( $msgPart, false );
