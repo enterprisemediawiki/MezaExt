@@ -303,7 +303,7 @@ class SpecialTransferPages extends SpecialPage {
 
 			$table = $this->getPageTable( $msgPart, $pages );
 
-			if ( $totalPagesQueried <= $egMezaExtTransferPagesMaxPages ) {
+			if ( $egMezaExtTransferPagesMaxPages !== 0 && $totalPagesQueried > $egMezaExtTransferPagesMaxPages ) {
 				$html .= $this->getAllPagesButtons( $msgPart, true );
 				$html .= $table;
 			} else {

@@ -5,18 +5,18 @@
 		tables = [ 'conflicting', 'identical', 'unique' ],
 		clickerFactory = function ( selector, checked ) {
 			return function ( event ) {
-				if ( $(this).prop( 'tagName' ) === 'A' ) {
+				if ( $( this ).prop( 'tagName' ) === 'A' ) {
 					event.preventDefault();
 				}
 				$( selector ).prop( 'checked', checked );
 			};
 		},
 		clearAllFactory = function ( groupName, pageTable ) {
-			return function ( event ) {
+			return function () {
 				// if the check-all/clear-all "buttons" are links not radios,
 				// then this is sort of pointless. I don't think it'll hurt
 				// anything though.
-				$( groupName + '-' + pageTable + '-all' ).prop( 'checked', false );
+				$( '.' + groupName + '-' + pageTable + '-all' ).prop( 'checked', false );
 			};
 		},
 		i,

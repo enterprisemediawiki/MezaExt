@@ -50,7 +50,7 @@
 	"dotransfer-unique-uncheck-all": "Do not transfer all unique pages",
 
 	"srcaction-donothingsrc-unique-check-all": "Do nothing to unique pages on source wiki",
-	"srcaction-deletesrc-unique-check-all": "Delete unique paegs on source wiki",
+	"srcaction-deletesrc-unique-check-all": "Delete unique pages on source wiki",
 	"srcaction-redirectsrc-unique-check-all": "Replace unique pages on source wiki with redirects to the destination wiki",
 
 	"serverstatus-mode-httpdstatus": "Apache server status",

@@ -54,7 +54,7 @@
 	},
 	"config": {
 		"_prefix": "eg",
-		"MezaExtTransferPagesMaxPages": 500
+		"MezaExtTransferPagesMaxPages": 0
 	},
 	"manifest_version": 1
 }
