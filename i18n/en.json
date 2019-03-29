@@ -32,26 +32,26 @@
 
 	"ext-meza-transferpages-hide-many-pages": "$1 total pages found. Individual pages hidden when greater than $2 pages.",
 
-	"dotransfer-conflicting-check-all": "",
-	"dotransfer-conflicting-uncheck-all": "",
+	"dotransfer-conflicting-check-all": "Transfer all conflicting pages (DANGER!)",
+	"dotransfer-conflicting-uncheck-all": "Do not transfer all conflicting pages",
 
-	"srcaction-donothingsrc-conflicting-check-all": "",
-	"srcaction-deletesrc-conflicting-check-all": "",
-	"srcaction-redirectsrc-conflicting-check-all": "",
+	"srcaction-donothingsrc-conflicting-check-all": "Do nothing to conflicting pages on source wiki (RECOMMENDED)",
+	"srcaction-deletesrc-conflicting-check-all": "Delete conflicting pages on source wiki",
+	"srcaction-redirectsrc-conflicting-check-all": "Replace conflicting pages on source wiki with a redirect to the destination",
 
-	"dotransfer-identical-check-all": "",
-	"dotransfer-identical-uncheck-all": "",
+	"dotransfer-identical-check-all": "Transfer all pages that already exist with identical content on destination",
+	"dotransfer-identical-uncheck-all": "Do not transfer all identical pages",
 
-	"srcaction-donothingsrc-identical-check-all": "",
-	"srcaction-deletesrc-identical-check-all": "",
-	"srcaction-redirectsrc-identical-check-all": "",
+	"srcaction-donothingsrc-identical-check-all": "Do nothing to identical pages on source wiki",
+	"srcaction-deletesrc-identical-check-all": "Delete identical pages on source wiki",
+	"srcaction-redirectsrc-identical-check-all": "Replace identical pages on source wiki with redirects to the destination wiki (RECOMMENDED)",
 
-	"dotransfer-unique-check-all": "",
-	"dotransfer-unique-uncheck-all": "",
+	"dotransfer-unique-check-all": "Transfer all unique pages",
+	"dotransfer-unique-uncheck-all": "Do not transfer all unique pages",
 
-	"srcaction-donothingsrc-unique-check-all": "",
-	"srcaction-deletesrc-unique-check-all": "",
-	"srcaction-redirectsrc-unique-check-all": "",
+	"srcaction-donothingsrc-unique-check-all": "Do nothing to unique pages on source wiki",
+	"srcaction-deletesrc-unique-check-all": "Delete unique paegs on source wiki",
+	"srcaction-redirectsrc-unique-check-all": "Replace unique pages on source wiki with redirects to the destination wiki",
 
 	"serverstatus-mode-httpdstatus": "Apache server status",
 	"serverstatus-mode-httpdinfo": "Apache server info",

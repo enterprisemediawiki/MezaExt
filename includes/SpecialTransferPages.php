@@ -429,7 +429,7 @@ class SpecialTransferPages extends SpecialPage {
 
 		$label = $this->msg( $id )->text();
 		if ( $type === 'radio' ) {
-			$button = "<input type='radio' name='$id' id='$id' class='$class' value='1'>"
+			$button = "<input type='radio' name='$name' id='$id' class='$class' value='1'>"
 				. "<label for='$id'>$label</label>";
 		} else {
 			$button = "<a href='#' id='$id'>$label</a>";
