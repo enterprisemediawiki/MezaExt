@@ -12,8 +12,7 @@
 		i,
 		j,
 		action,
-		actionBool,
-		table;
+		actionBool;
 
 	for ( i = 0; i < actions.length; i++ ) {
 		for ( j = 0; j < tables.length; j++ ) {
