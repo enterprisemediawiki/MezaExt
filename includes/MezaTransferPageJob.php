@@ -1,8 +1,8 @@
 <?php
 class MezaTransferPageJob extends Job {
 
-	public $pageListForDump = '/opt/data-meza/mw-temp/mezaExt-TransferPages-pagelist';
-	public $pageDumpOutputXML = '/opt/data-meza/mw-temp/mezaExt-TransferPages-pageDumpOutputXML';
+	public $pageListForDump = '/opt/data-meza/tmp/mezaExt-TransferPages-pagelist';
+	public $pageDumpOutputXML = '/opt/data-meza/tmp/mezaExt-TransferPages-pageDumpOutputXML';
 	public $maintDir = '/opt/htdocs/mediawiki/maintenance/';
 
 	public function __construct( Title $title, array $params ) {
