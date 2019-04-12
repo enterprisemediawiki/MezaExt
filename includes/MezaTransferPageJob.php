@@ -11,8 +11,6 @@ class MezaTransferPageJob extends Job {
 	}
 
 	public function run() {
-		trigger_error( "run meza transfer job as " . exec( "whoami" ) );
-
 		$unique = uniqid( '', true ); // unique enough
 		$this->pageListForDump .= '-' . $unique;
 		$this->pageDumpOutputXML .= '-' . $unique;
@@ -21,6 +19,8 @@ class MezaTransferPageJob extends Job {
 		$srcWiki = $this->params['src'];
 		$destWiki = $this->params['dest'];
 		$srcAction = $this->params['srcAction'];
+
+		trigger_error( "User " . exec( "whoami" ) . " running TransferPages: page=$page, src=$srcWiki, dest=$destWiki, srcAtion=$srcAction" );
 
 		// remove existing files
 		if ( file_exists( $this->pageListForDump ) ) {
