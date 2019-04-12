@@ -194,7 +194,6 @@ class SpecialTransferPages extends SpecialPage {
 
 		$numRows = 0;
 		while( $row = $dbr->fetchRow( $res ) ) {
-
 			list($ns, $titleText, $srcId, $wikis, $numContentUniques, $numNameDupes) = [
 				$row['ns'],
 				$row['title'],
@@ -204,9 +203,9 @@ class SpecialTransferPages extends SpecialPage {
 				$row['num_name_dupes']
 			];
 
-			$isOnDest = $numNameDupes > 1 ? true : false;
+			$isOnDest = intval( $numNameDupes ) > 1 ? true : false;
 			if ( $isOnDest ) {
-				$conflictWithDest = $numContentUniques > 1 ? true : false;
+				$conflictWithDest = intval( $numContentUniques ) > 1 ? true : false;
 			}
 			else {
 				$conflictWithDest = false;
@@ -512,7 +511,7 @@ class SpecialTransferPages extends SpecialPage {
 		}
 
 		$srcQuery = $this->getWikiQueryPart( $srcWiki, $category, $namespace, true );
-		$destQuery = $this->getWikiQueryPart( $destWiki, $category, $namespace, false );
+		$destQuery = $this->getWikiQueryPart( $destWiki, null, $namespace, false );
 
 		// WHERE wikis != '$destWiki':
 		//   Don't show pages that only exist on the destination wiki since we
