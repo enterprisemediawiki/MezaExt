@@ -1,8 +1,8 @@
 <?php
 class MezaTransferPageJob extends Job {
 
-	public $pageListForDump = '/opt/data-meza/tmp/mezaExt-TransferPages-pagelist';
-	public $pageDumpOutputXML = '/opt/data-meza/tmp/mezaExt-TransferPages-pageDumpOutputXML';
+	public $pageListForDump = '/opt/data-meza/mw-temp/mezaExt-TransferPages-pagelist';
+	public $pageDumpOutputXML = '/opt/data-meza/mw-temp/mezaExt-TransferPages-pageDumpOutputXML';
 	public $maintDir = '/opt/htdocs/mediawiki/maintenance/';
 
 	public function __construct( Title $title, array $params ) {
@@ -11,6 +11,7 @@ class MezaTransferPageJob extends Job {
 	}
 
 	public function run() {
+		trigger_error( "run meza transfer job as " . exec( "whoami" ) );
 
 		$unique = uniqid( '', true ); // unique enough
 		$this->pageListForDump .= '-' . $unique;
@@ -62,6 +63,8 @@ class MezaTransferPageJob extends Job {
 			"--report=100 " .
 			"< {$this->pageDumpOutputXML}"
 		);
+
+		RefreshLinks::fixLinksFromArticle( $this->title->getArticleID() );
 
 		// perform source post-transfer action (delete, redirect, etc)
 		if ( $srcAction === 'deletesrc' ) {
