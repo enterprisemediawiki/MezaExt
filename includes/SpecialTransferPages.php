@@ -59,6 +59,10 @@ class SpecialTransferPages extends SpecialPage {
 	}
 
 	function execute( $par ) {
+		
+		if ( !$this->getUser()->isAllowed( 'transferpages' ) ) {
+			throw new PermissionsError( 'transferpages' );
+		}
 
 		$this->getOutput()->setPageTitle( 'Transfer pages' );  // FIXME i18n
 
