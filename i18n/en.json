@@ -31,6 +31,7 @@
 	"ext-meza-transferpages-srcaction-all-unique": "For unique pages on the source wiki:",
 
 	"ext-meza-transferpages-hide-many-pages": "$1 total pages found. Individual pages hidden when greater than $2 pages.",
+	"action-transferpages": "Transfer Pages",
 
 	"dotransfer-conflicting-check-all": "Transfer all conflicting pages (DANGER!)",
 	"dotransfer-conflicting-uncheck-all": "Do not transfer all conflicting pages",
