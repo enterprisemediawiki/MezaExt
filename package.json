@@ -1,0 +1,25 @@
+{
+  "name": "mezaext",
+  "version": "0.1.0",
+  "description": "MediaWiki extension to support Meza",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint-config-wikimedia": "^0.14.0",
+    "eslint-plugin-no-jquery": "^2.1.0"
+  },
+  "scripts": {
+    "pretest": "npm install",
+    "test": "eslint . --color"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enterprisemediawiki/MezaExt.git"
+  },
+  "author": "James Montalvo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/enterprisemediawiki/MezaExt/issues"
+  },
+  "homepage": "https://github.com/enterprisemediawiki/MezaExt#readme"
+}
