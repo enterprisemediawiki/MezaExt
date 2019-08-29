@@ -621,7 +621,7 @@ class SpecialTransferPages extends SpecialPage {
 		$output = $this->msg( 'ext-meza-transferpages-transferring-summary' )
 			->params( $destWiki )
 			->text();
-		$output .= "<ul>";
+		$output .= "<ol>";
 
 		foreach ( $titles as $title ) {
 			$id = $title->getArticleID();
@@ -644,7 +644,7 @@ class SpecialTransferPages extends SpecialPage {
 			);
 
 		}
-		$output .= '</ul>';
+		$output .= '</ol>';
 
 		JobQueueGroup::singleton()->push( $jobs );
 
