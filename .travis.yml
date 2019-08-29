@@ -49,7 +49,7 @@ matrix:
         - whoami
         - pwd
         - cat /etc/os-release
-        - npm install -g eslint eslint-plugin-no-jquery eslint-config-wikimedia
+        - npm install -g eslint
       script:
         - eslint . --color
 
