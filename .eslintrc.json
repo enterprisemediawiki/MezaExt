@@ -18,9 +18,10 @@
 		"no-jquery/no-parse-html-literal": "off",
 		"no-jquery/no-animate-toggle": "off",
 		"no-jquery/no-toggle": "off",
-		"no-jquery/no-event-shorthand": "off"
+		"no-jquery/no-event-shorthand": "off",
 
-		// Uncomment this if testing on Windows
-		// ,"linebreak-style": "off"
+		// Need this off to avoid headaches with Windows. Git should make sure
+		// line endings are appropriate.
+		"linebreak-style": "off"
 	}
 }
