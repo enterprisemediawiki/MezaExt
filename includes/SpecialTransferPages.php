@@ -507,7 +507,7 @@ class SpecialTransferPages extends SpecialPage {
 
 		$srcWiki = $wikiId;
 		$destWiki = $request->getVal( 'destinationwiki' );
-		$category = $request->getVal( 'category' );
+		$category = str_replace( ' ', '_', $request->getVal( 'category' ) );
 
 		$namespace = $request->getVal( 'namespace', false );
 		if ( $namespace === 'all' ) {
