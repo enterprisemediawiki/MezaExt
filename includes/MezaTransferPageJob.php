@@ -64,7 +64,7 @@ class MezaTransferPageJob extends Job {
 			"< {$this->pageDumpOutputXML}"
 		);
 
-		$this->transferWatchers();
+		$this->transferWatchers( $destWiki );
 
 		RefreshLinks::fixLinksFromArticle( $this->title->getArticleID() );
 
@@ -87,12 +87,12 @@ class MezaTransferPageJob extends Job {
 		return $row['wl_user'] . '-' . $row['wl_namespace'] . '-' . $row['wl_title'];
 	}
 
-	public function transferWatchers () {
+	public function transferWatchers ($destWiki) {
 
-		$destWikiDatabase = $this->getWikiDbConfig( $destWiki )['database'];
+		$destWikiDBname = $this->getWikiDbConfig( $destWiki )['database'];
 
 		// establish connection with destination wiki database
-		$destDatabase = wfGetDB( DB_MASTER, [], $destWikiDatabase );
+		$destDatabase = wfGetDB( DB_MASTER, [], $destWikiDBname );
 
 		$srcDatabase = wfGetDB( DB_MASTER );
 
@@ -113,12 +113,14 @@ class MezaTransferPageJob extends Job {
 			];
 		}
 
+		$fields = [ 'wl_user', 'wl_namespace', 'wl_title', 'wl_notificationtimestamp' ];
+
 		//
 		// Select and process data from the source wiki
 		//
 		$srcWatchesResult = $srcDatabase->select(
 			'watchlist',
-			[ 'wl_user', 'wl_namespace', 'wl_title', 'wl_notificationtimestamp' ],
+			$fields,
 			[ 'wl_namespace' => $this->title->getNamespace(), 'wl_title' => $this->title->getDBkey() ],
 			__METHOD__
 		);
@@ -130,7 +132,7 @@ class MezaTransferPageJob extends Job {
 			// If this user+namespace+page doesn't have a watchlist item on the dest
 			// wiki, then simply insert the src wiki data into the dest wiki
 			if ( ! isset( $destWatchesHashTable[$uniqueKey] ) ) {
-				$watchesToInsert[] = $row;
+				$watchesToInsert[] = $this->sanitizeRow( $row, $fields );
 
 			// Otherwise, determine which wiki's wl_notificationtimestamp to keep
 			} else {
@@ -158,21 +160,21 @@ class MezaTransferPageJob extends Job {
 				}
 
 				$row['wl_notificationtimestamp'] = $ts;
-				$watchesToUpdate[] = $row;
+				$watchesToUpdate[] = $this->sanitizeRow( $row, $fields );
 			}
 		}
 
 		// insert and update destination wiki watchlist if those lists have anything in
 		// them
 		if ( count( $watchesToInsert ) ) {
-			$destWikiDatabase->insert(
+			$destDatabase->insert(
 				'watchlist',
 				$watchesToInsert,
 				__METHOD__
 			);
 		}
 		if ( count( $watchesToUpdate ) ) {
-			$destWikiDatabase->update(
+			$destDatabase->update(
 				'watchlist',
 				$watchesToUpdate,
 				[], // conditions
@@ -187,7 +189,7 @@ class MezaTransferPageJob extends Job {
 
 		global $m_htdocs, $wgDBuser, $wgDBpassword;
 
-		include "$m_htdocs/wikis/$wikiID/config/preLocalSettings.php";
+		include "$m_htdocs/wikis/$wikiID/config/preLocalSettings.d/base.php";
 
 		if ( isset( $mezaCustomDBname ) ) {
 			$wikiDBname = $mezaCustomDBname;
@@ -205,6 +207,23 @@ class MezaTransferPageJob extends Job {
 			'password' => $wikiDBpass
 		];
 
+	}
+
+	// without this for some reason you get an array like:
+	// [ 'wl_user'       => 1,
+	//    0              => 1,
+	//    'wl_namespace' => 0
+	//    1              => 0,
+	//    'wl_title'     => 'Main_Page',
+	//    2              => 'Main_Page', ... ]
+	// In other words, you get the array indexes as well as the text keys. Why?
+	// I forget if this is a PHP or MediaWiki thing. Either way, this cleans it.
+	protected sanitizeRow ( $row, $fields ) {
+		$cleanRow = [];
+		for ( $fields as $field ) {
+			$cleanRow[$field] = $row[$field];
+		}
+		return $cleanRow;
 	}
 
 }
