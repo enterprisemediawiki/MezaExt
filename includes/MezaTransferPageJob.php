@@ -20,8 +20,6 @@ class MezaTransferPageJob extends Job {
 		$destWiki = $this->params['dest'];
 		$srcAction = $this->params['srcAction'];
 
-		trigger_error( "User " . exec( "whoami" ) . " running TransferPages: page=$page, src=$srcWiki, dest=$destWiki, srcAtion=$srcAction" );
-
 		// remove existing files
 		if ( file_exists( $this->pageListForDump ) ) {
 			unlink( $this->pageListForDump );
@@ -171,53 +169,14 @@ class MezaTransferPageJob extends Job {
 			}
 		}
 
-		// insert and update destination wiki watchlist if those lists have anything in
-		// them
-		if ( count( $watchesToInsert ) > 0 ) {
-			foreach ( $watchesToInsert as $watch ) {
-				trigger_error( "INSERTING: " . var_export( $watch, true ) );
-
-				$this->doManualInsert($watch, $destWikiDBname);
-
-				// $destDatabase->insert(
-				// 	'watchlist',
-				// 	$watch,
-				// 	__METHOD__
-				// );
-
-				// $destDatabase->query(
-				// 	"INSERT INTO watchlist
-				// 	(wl_user, wl_namespace, wl_title, wl_notificationtimestamp)
-				// 	VALUES
-				// 	(
-				// 		{$watch['wl_user']},
-				// 		{$watch['wl_namespace']},
-				// 		\"{$watch['wl_title']}\",
-				// 		{$watch['wl_notificationtimestamp']}
-				// 	)"
-				// );
-			}
-			trigger_error( "INSERT COMPLETE" );
+		// insert and update destination wiki watchlist. See doManualInsert()
+		// for explanation why "manual" method is needed.
+		foreach ( $watchesToInsert as $watch ) {
+			$this->doManualInsert($watch, $destWikiDBname);
 		}
-
-
-		if ( count( $watchesToUpdate ) > 0 ) {
-			trigger_error( "DOING WATCHES TO UPDATE" );
-			foreach ( $watchesToUpdate as $watch ) {
-				$destDatabase->update(
-					'watchlist',
-					[ 'wl_notificationtimestamp' => $watchesToUpdate['wl_notificationtimestamp'] ],
-					[ // conditions
-						'wl_user' => $watchesToUpdate['wl_user'],
-						'wl_namespace' => $watchesToUpdate['wl_namespace'],
-						'wl_title' => $watchesToUpdate['wl_title'],
-					],
-					__METHOD__
-				);
-			}
-			trigger_error( "UPDATE COMPLETE" );
+		foreach ( $watchesToUpdate as $watch ) {
+			$this->doManualUpdate( $watch, asdfasdfasdf );
 		}
-
 	}
 
 	// taken from meza unify user script
@@ -269,6 +228,26 @@ class MezaTransferPageJob extends Job {
 		];
 	}
 
+	/**
+	 * Do SQL UPDATE on destination wiki.
+	 *
+	 * For some reason doing this "manually" is required. In other words, we
+	 * have to directly use mysqli rather than using the MediaWiki API. Using
+	 * $destDatabase->insert( ... ) should work, but for some reason it was not
+	 * writing to the database despite not throwing any errors and all
+	 * indications being that data was written. Using mysqli directly does not
+	 * have this issue.
+	 *
+	 * $destDatabase->insert( 'watchlist', $watch, __METHOD__ );
+	 *
+	 * Also, using $destDatabase->query( ... ) was attempted, but had the same
+	 * issue.
+	 *
+	 * @param  Array $watch           Row of table "watchlist"
+	 * @param  String $destWikiDBname Name of destination wiki database, e.g.
+	 *                                'wiki_demo'
+	 * @return null
+	 */
 	protected function doManualInsert ($watch, $destWikiDBname) {
 
 		global $databaseServer, $mezaDatabaseUser, $mezaDatabasePassword;
@@ -286,11 +265,6 @@ class MezaTransferPageJob extends Job {
 			(?, ?, ?, ?)
 		";
 
-		// {$watch['wl_user']},
-		// {$watch['wl_namespace']},
-		// \"$title\",
-		// $ts
-
 		$stmt = $db->prepare($sql);
 		$stmt->bind_param(
 			'iisi',
@@ -307,4 +281,54 @@ class MezaTransferPageJob extends Job {
 
 	}
 
+	/**
+	 * This should work:
+	 *
+	 * $destDatabase->update(
+	 *     'watchlist',
+	 *     [ 'wl_notificationtimestamp' => $watchesToUpdate['wl_notificationtimestamp'] ],
+	 *     [ // conditions
+	 *         'wl_user' => $watchesToUpdate['wl_user'],
+	 *         'wl_namespace' => $watchesToUpdate['wl_namespace'],
+	 *         'wl_title' => $watchesToUpdate['wl_title'],
+	 *     ],
+	 *     __METHOD__
+	 * );
+	 *
+	 * Buuuuuuuut...it doesn't. See doManualInsert above for explanation.
+	 */
+	protected function doManualUpdate ($watch, $destWikiDBname) {
+
+		global $databaseServer, $mezaDatabaseUser, $mezaDatabasePassword;
+
+		$db = new mysqli($databaseServer, $mezaDatabaseUser, $mezaDatabasePassword, $destWikiDBname);
+
+		if($db->connect_errno > 0){
+			die('Unable to connect to database [' . $db->connect_error . ']');
+		}
+
+		$sql = "
+			UPDATE watchlist
+			SET wl_notificationtimestamp = ?
+			WHERE
+				wl_user = ?
+				AND wl_namespace = ?
+				AND wl_title = ?
+		";
+
+		$stmt = $db->prepare($sql);
+		$stmt->bind_param(
+			'iiis',
+			$watch['wl_notificationtimestamp'],
+			$watch['wl_user'],
+			$watch['wl_namespace'],
+			$watch['wl_title'],
+		);
+
+		$stmt->execute();
+
+		$stmt->close();
+		$db->close();
+
+	}
 }
