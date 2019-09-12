@@ -283,17 +283,27 @@ class MezaTransferPageJob extends Job {
 			INSERT INTO watchlist
 			(wl_user, wl_namespace, wl_title, wl_notificationtimestamp)
 			VALUES
-			(
-				{$watch['wl_user']},
-				{$watch['wl_namespace']},
-				\"{$watch['wl_title']}\",
-				{$watch['wl_notificationtimestamp']}
-			)
+			(?, ?, ?, ?)
 		";
 
-		if(!$result = $db->query($sql)){
-			die('There was an error running the query [' . $db->error . ']');
-		}
+		// {$watch['wl_user']},
+		// {$watch['wl_namespace']},
+		// \"$title\",
+		// $ts
+
+		$stmt = $db->prepare($sql);
+		$stmt->bind_param(
+			'iisi',
+			$watch['wl_user'],
+			$watch['wl_namespace'],
+			$watch['wl_title'],
+			$watch['wl_notificationtimestamp']
+		);
+
+		$stmt->execute();
+
+		$stmt->close();
+		$db->close();
 
 	}
 
