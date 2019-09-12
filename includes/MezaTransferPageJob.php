@@ -69,13 +69,13 @@ class MezaTransferPageJob extends Job {
 		// perform source post-transfer action (delete, redirect, etc)
 		if ( $srcAction === 'deletesrc' ) {
 			$context = new RequestContext();
-			$context->setTitle( $title );
-			$article = Article::newFromTitle( $title, $context );
+			$context->setTitle( $this->title );
+			$article = Article::newFromTitle( $this->title, $context );
 			$article->doDelete( "Transferred to wiki \"$destWiki\" using Special:TransferPages" );
 		} elseif ( $srcAction === 'redirectsrc' ) {
 			WikiPage::factory($this->title)->doEditContent(
-				"#REDIRECT [[$destWiki:$page]]", // content
-				"Content transferred to wiki \"$destWiki\" using Special:TransferPages"
+				new WikitextContent( "#REDIRECT [[$destWiki:$page]]" ),
+				"Content transferred to wiki \"$destWiki\" using Special:TransferPages" // summary
 				// $flags = 0
 				// $originalRevId = false
 				// $user = null <-- should this be "maint script"?
