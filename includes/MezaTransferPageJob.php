@@ -94,7 +94,7 @@ class MezaTransferPageJob extends Job {
 		// establish connection with destination wiki database
 		$destDatabase = wfGetDB( DB_MASTER, [], $destWikiDBname );
 
-		$srcDatabase = wfGetDB( DB_MASTER );
+		$srcDatabase = wfGetDB( DB_REPLICA );
 
 		//
 		// Select and process data from dest wiki
@@ -132,7 +132,7 @@ class MezaTransferPageJob extends Job {
 			// If this user+namespace+page doesn't have a watchlist item on the dest
 			// wiki, then simply insert the src wiki data into the dest wiki
 			if ( ! isset( $destWatchesHashTable[$uniqueKey] ) ) {
-				$watchesToInsert[] = $this->sanitizeRow( $row, $fields );
+				$watchesToInsert[] = $this->sanitizeRow( $row );
 
 			// Otherwise, determine which wiki's wl_notificationtimestamp to keep
 			} else {
@@ -148,38 +148,74 @@ class MezaTransferPageJob extends Job {
 					continue;
 
 				// If one is NULL at this point (we know they're not both NULL), then
-				// set the other as the notification timestamp
+				// the other is the preferable notification timestamp
 				} elseif ( is_null( $destTimestamp ) ) {
 					$ts = $srcTimestamp;
-				} elseif ( is_null( $srcTimestamp ) ) {
-					$ts = $destTimestamp;
 
-				// Set the timestamp to the older one (missing more changes to the page)
+				// if src is null at this point, then we'd want to set the value
+				// to the dest wiki's...but it's already set that way so move on
+				} elseif ( is_null( $srcTimestamp ) ) {
+					continue;
+
+				// Set the timestamp to the older src timestamp
+				} elseif ( $destTimestamp > $srcTimestamp ) {
+					$ts = $srcTimestamp;
+
+				// the dest timestamp is older. keep using that and move on.
 				} else {
-					$ts = $destTimestamp > $srcTimestamp ? $srcTimestamp : $destTimestamp;
+					continue;
 				}
 
 				$row['wl_notificationtimestamp'] = $ts;
-				$watchesToUpdate[] = $this->sanitizeRow( $row, $fields );
+				$watchesToUpdate[] = $this->sanitizeRow( $row );
 			}
 		}
 
 		// insert and update destination wiki watchlist if those lists have anything in
 		// them
-		if ( count( $watchesToInsert ) ) {
-			$destDatabase->insert(
-				'watchlist',
-				$watchesToInsert,
-				__METHOD__
-			);
+		if ( count( $watchesToInsert ) > 0 ) {
+			foreach ( $watchesToInsert as $watch ) {
+				trigger_error( "INSERTING: " . var_export( $watch, true ) );
+
+				$this->doManualInsert($watch, $destWikiDBname);
+
+				// $destDatabase->insert(
+				// 	'watchlist',
+				// 	$watch,
+				// 	__METHOD__
+				// );
+
+				// $destDatabase->query(
+				// 	"INSERT INTO watchlist
+				// 	(wl_user, wl_namespace, wl_title, wl_notificationtimestamp)
+				// 	VALUES
+				// 	(
+				// 		{$watch['wl_user']},
+				// 		{$watch['wl_namespace']},
+				// 		\"{$watch['wl_title']}\",
+				// 		{$watch['wl_notificationtimestamp']}
+				// 	)"
+				// );
+			}
+			trigger_error( "INSERT COMPLETE" );
 		}
-		if ( count( $watchesToUpdate ) ) {
-			$destDatabase->update(
-				'watchlist',
-				$watchesToUpdate,
-				[], // conditions
-				__METHOD__
-			);
+
+
+		if ( count( $watchesToUpdate ) > 0 ) {
+			trigger_error( "DOING WATCHES TO UPDATE" );
+			foreach ( $watchesToUpdate as $watch ) {
+				$destDatabase->update(
+					'watchlist',
+					[ 'wl_notificationtimestamp' => $watchesToUpdate['wl_notificationtimestamp'] ],
+					[ // conditions
+						'wl_user' => $watchesToUpdate['wl_user'],
+						'wl_namespace' => $watchesToUpdate['wl_namespace'],
+						'wl_title' => $watchesToUpdate['wl_title'],
+					],
+					__METHOD__
+				);
+			}
+			trigger_error( "UPDATE COMPLETE" );
 		}
 
 	}
@@ -218,12 +254,47 @@ class MezaTransferPageJob extends Job {
 	//    2              => 'Main_Page', ... ]
 	// In other words, you get the array indexes as well as the text keys. Why?
 	// I forget if this is a PHP or MediaWiki thing. Either way, this cleans it.
-	protected sanitizeRow ( $row, $fields ) {
-		$cleanRow = [];
-		for ( $fields as $field ) {
-			$cleanRow[$field] = $row[$field];
+	protected function sanitizeRow ( $row ) {
+		if ( is_null( $row['wl_notificationtimestamp'] ) ) {
+			$ts = null;
+		} else {
+			$ts = intval( $row['wl_notificationtimestamp'] );
 		}
-		return $cleanRow;
+
+		return [
+			'wl_user'                  => intval( $row['wl_user'] ),
+			'wl_namespace'             => intval( $row['wl_namespace'] ),
+			'wl_title'                 => $row['wl_title'],
+			'wl_notificationtimestamp' => $ts,
+		];
+	}
+
+	protected function doManualInsert ($watch, $destWikiDBname) {
+
+		global $databaseServer, $mezaDatabaseUser, $mezaDatabasePassword;
+
+		$db = new mysqli($databaseServer, $mezaDatabaseUser, $mezaDatabasePassword, $destWikiDBname);
+
+		if($db->connect_errno > 0){
+			die('Unable to connect to database [' . $db->connect_error . ']');
+		}
+
+		$sql = "
+			INSERT INTO watchlist
+			(wl_user, wl_namespace, wl_title, wl_notificationtimestamp)
+			VALUES
+			(
+				{$watch['wl_user']},
+				{$watch['wl_namespace']},
+				\"{$watch['wl_title']}\",
+				{$watch['wl_notificationtimestamp']}
+			)
+		";
+
+		if(!$result = $db->query($sql)){
+			die('There was an error running the query [' . $db->error . ']');
+		}
+
 	}
 
 }
