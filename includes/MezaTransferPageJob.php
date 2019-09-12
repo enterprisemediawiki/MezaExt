@@ -68,9 +68,18 @@ class MezaTransferPageJob extends Job {
 
 		// perform source post-transfer action (delete, redirect, etc)
 		if ( $srcAction === 'deletesrc' ) {
-			// $this->deletePageFromSource( $title, $srcWiki );
+			$context = new RequestContext();
+			$context->setTitle( $title );
+			$article = Article::newFromTitle( $title, $context );
+			$article->doDelete( "Transferred to wiki \"$destWiki\" using Special:TransferPages" );
 		} elseif ( $srcAction === 'redirectsrc' ) {
-			// $this->redirectSourceToDest( $title, $srcWiki, $destWiki );
+			WikiPage::factory($this->title)->doEditContent(
+				"#REDIRECT [[$destWiki:$page]]", // content
+				"Content transferred to wiki \"$destWiki\" using Special:TransferPages"
+				// $flags = 0
+				// $originalRevId = false
+				// $user = null <-- should this be "maint script"?
+			);
 		}
 		// else do nothing
 
