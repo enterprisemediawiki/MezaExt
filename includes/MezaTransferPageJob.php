@@ -64,6 +64,8 @@ class MezaTransferPageJob extends Job {
 			"< {$this->pageDumpOutputXML}"
 		);
 
+		$this->transferWatchers();
+
 		RefreshLinks::fixLinksFromArticle( $this->title->getArticleID() );
 
 		// perform source post-transfer action (delete, redirect, etc)
@@ -79,6 +81,130 @@ class MezaTransferPageJob extends Job {
 		unlink( $this->pageDumpOutputXML );
 
 		return true;
+	}
+
+	public function genUniqueKey ( $row ) {
+		return $row['wl_user'] . '-' . $row['wl_namespace'] . '-' . $row['wl_title'];
+	}
+
+	public function transferWatchers () {
+
+		$destWikiDatabase = $this->getWikiDbConfig( $destWiki )['database'];
+
+		// establish connection with destination wiki database
+		$destDatabase = wfGetDB( DB_MASTER, [], $destWikiDatabase );
+
+		$srcDatabase = wfGetDB( DB_MASTER );
+
+		//
+		// Select and process data from dest wiki
+		//
+		$destWatchesResult = $destDatabase->select(
+			'watchlist',
+			[ 'wl_user', 'wl_namespace', 'wl_title', 'wl_notificationtimestamp' ],
+			[ 'wl_namespace' => $this->title->getNamespace(), 'wl_title' => $this->title->getDBkey() ],
+			__METHOD__
+		);
+		$destWatchesHashTable = [];
+		while ( $row = $destWatchesResult->fetchRow() ) {
+			// create a fast way to lookup if watches found on destination wiki
+			$destWatchesHashTable[$this->genUniqueKey( $row )] = [
+				'wl_notificationtimestamp' => $row['wl_notificationtimestamp']
+			];
+		}
+
+		//
+		// Select and process data from the source wiki
+		//
+		$srcWatchesResult = $srcDatabase->select(
+			'watchlist',
+			[ 'wl_user', 'wl_namespace', 'wl_title', 'wl_notificationtimestamp' ],
+			[ 'wl_namespace' => $this->title->getNamespace(), 'wl_title' => $this->title->getDBkey() ],
+			__METHOD__
+		);
+		$watchesToInsert = [];
+		$watchesToUpdate = [];
+		while ( $row = $srcWatchesResult->fetchRow() ) {
+			$uniqueKey = $this->genUniqueKey( $row );
+
+			// If this user+namespace+page doesn't have a watchlist item on the dest
+			// wiki, then simply insert the src wiki data into the dest wiki
+			if ( ! isset( $destWatchesHashTable[$uniqueKey] ) ) {
+				$watchesToInsert[] = $row;
+
+			// Otherwise, determine which wiki's wl_notificationtimestamp to keep
+			} else {
+
+				$destTimestamp = $destWatchesHashTable[$uniqueKey]['wl_notificationtimestamp'];
+				$srcTimestamp = $row['wl_notificationtimestamp'];
+
+				// Timestamps are the same, so do nothing and leave destination as-is.
+				// This is extremely unlikely with actual timestamps, but if the user
+				// has seen the latest version on both wikis then the timestamp will be
+				// NULL on both.
+				if ( $destTimestamp === $srcTimestamp ) {
+					continue;
+
+				// If one is NULL at this point (we know they're not both NULL), then
+				// set the other as the notification timestamp
+				} elseif ( is_null( $destTimestamp ) ) {
+					$ts = $srcTimestamp;
+				} elseif ( is_null( $srcTimestamp ) ) {
+					$ts = $destTimestamp;
+
+				// Set the timestamp to the older one (missing more changes to the page)
+				} else {
+					$ts = $destTimestamp > $srcTimestamp ? $srcTimestamp : $destTimestamp;
+				}
+
+				$row['wl_notificationtimestamp'] = $ts;
+				$watchesToUpdate[] = $row;
+			}
+		}
+
+		// insert and update destination wiki watchlist if those lists have anything in
+		// them
+		if ( count( $watchesToInsert ) ) {
+			$destWikiDatabase->insert(
+				'watchlist',
+				$watchesToInsert,
+				__METHOD__
+			);
+		}
+		if ( count( $watchesToUpdate ) ) {
+			$destWikiDatabase->update(
+				'watchlist',
+				$watchesToUpdate,
+				[], // conditions
+				__METHOD__
+			);
+		}
+
+	}
+
+	// taken from meza unify user script
+	protected function getWikiDbConfig ( $wikiID ) {
+
+		global $m_htdocs, $wgDBuser, $wgDBpassword;
+
+		include "$m_htdocs/wikis/$wikiID/config/preLocalSettings.php";
+
+		if ( isset( $mezaCustomDBname ) ) {
+			$wikiDBname = $mezaCustomDBname;
+		} else {
+			$wikiDBname = "wiki_$wikiID";
+		}
+
+		$wikiDBuser = isset( $mezaCustomDBuser ) ? $mezaCustomDBuser : $wgDBuser;
+		$wikiDBpass = isset( $mezaCustomDBpass ) ? $mezaCustomDBpass : $wgDBpassword;
+
+		return [
+			'id' => $wikiID,
+			'database' => $wikiDBname,
+			'user' => $wikiDBuser,
+			'password' => $wikiDBpass
+		];
+
 	}
 
 }
