@@ -322,7 +322,7 @@ class MezaTransferPageJob extends Job {
 			$watch['wl_notificationtimestamp'],
 			$watch['wl_user'],
 			$watch['wl_namespace'],
-			$watch['wl_title'],
+			$watch['wl_title']
 		);
 
 		$stmt->execute();
